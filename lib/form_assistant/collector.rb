@@ -3,13 +3,19 @@ module RPH
     private
       class Collector
         attr_accessor :collection
+      
+      private
+        def collect(item)
+          collection << item and return self
+        end
+      
+      public
+        def self.wrap(element)
+          new.collect(element.to_sym)
+        end
         
         def initialize
           @collection = []
-        end
-        
-        def collect(item)
-          collection << item and return self
         end
         
         def having(attrs = {})

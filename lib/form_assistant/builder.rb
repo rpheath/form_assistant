@@ -4,12 +4,12 @@ module RPH
       class Builder
         attr_reader :collection
         
-        def initialize(collection)
-          @collection = collection
-        end
-        
         def self.build(collection)
           new(collection)
+        end
+        
+        def initialize(collection)
+          @collection = collection
         end
         
         def for(template, binding)
