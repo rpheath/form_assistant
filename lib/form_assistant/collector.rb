@@ -2,12 +2,14 @@ module RPH
   module FormAssistant
     private
       class Collector
+        attr_accessor :collection
+        
         def initialize
-          @items = []
+          @collection = []
         end
         
         def collect(item)
-          @items << item and return self
+          collection << item and return self
         end
         
         def having(attrs = {})
@@ -20,11 +22,6 @@ module RPH
         
         def for(template, binding = nil)
           Builder.build(collection).for(template, binding)
-        end
-        
-      private
-        def collection
-          @items
         end
       end
   end
