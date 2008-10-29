@@ -1,49 +1,11 @@
+%w(error builder collector).each do |f|
+  require File.join(File.dirname(__FILE__), 'form_assistant', f)
+end
+
 module RPH
   module FormAssistant
     private
-      class Collector
-        def initialize
-          @items = []
-        end
-        
-        def collect(item)
-          @items << item and return self
-        end
-        
-        def collection
-          @items
-        end
-        
-        def having(attrs = {})
-          collect(attrs)
-        end
-        
-        def around(content = nil, &block)
-          collect(content)
-        end
-        
-        def for(template)
-          Builder.build(collection).for(template)
-        end
-      end
-      
-      class Builder
-        attr_reader :collection
-        
-        def initialize(collection)
-          @collection = collection
-        end
-        
-        def self.build(collection)
-          new(collection)
-        end
-        
-        def for(template)
-          # magic goes here
-        end
-      end
-      
-      def wrap(tag, options = {}, content = nil, &block)
+      def wrap(tag)
         Collector.new.collect(tag)
       end
       
