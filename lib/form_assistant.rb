@@ -15,8 +15,7 @@ module RPH
       end
       
       def submission(value = 'Save Changes', options = {})
-        attrs = options.delete(:attrs)
-        wrap(:p).having(attrs).around(self.submit(value, options)).for(@template)
+        wrap(:p).having(options.delete(:attrs)).around(self.submit(value, options)).for(@template)
       end
     
       def method_missing(method, *args, &block)
