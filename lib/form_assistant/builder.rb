@@ -12,8 +12,15 @@ module RPH
           new(collection)
         end
         
-        def for(template)
-          # magic goes here
+        def for(template, binding = nil)
+          element = collection[0]
+          options = collection[1]
+          content = collection[2]
+          if binding
+            template.concat(template.content_tag(element, content, options), binding)
+          else
+            template.content_tag(element, content, options)
+          end
         end
       end
   end

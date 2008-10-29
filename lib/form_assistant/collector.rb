@@ -22,8 +22,8 @@ module RPH
           collect(content)
         end
         
-        def for(template)
-          Builder.build(collection).for(template)
+        def for(template, binding = nil)
+          Builder.build(collection).for(template, binding)
         end
       end
   end

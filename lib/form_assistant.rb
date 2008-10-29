@@ -11,7 +11,12 @@ module RPH
       
     public
       def div(attrs = {}, &block)
-        wrap(:div).having(attrs).around(@template.capture(&block)).for(@template)
+        wrap(:div).having(attrs).around(@template.capture(&block)).for(@template, block.binding)
+      end
+      
+      def submission(value = 'Save Changes', options = {})
+        attrs = options.delete(:attrs)
+        wrap(:p).having(attrs).around(self.submit(value, options)).for(@template)
       end
     
       def method_missing(method, *args, &block)
