@@ -23,9 +23,7 @@ module RPH
         super(method, *args) unless block_given?
       
         css = method.to_s.downcase.gsub('_', '-')
-        @template.concat(@template.content_tag(:div, :class => css) do
-          @template.capture(&block)
-        end, block.binding)
+        wrap(:div).having(:class => css).around(@template.capture(&block)).for(@template, block.binding)
       end
   end
 end
