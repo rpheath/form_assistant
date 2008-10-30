@@ -1,8 +1,10 @@
 h1. FormAssistant
 
 This is an easily extendible Rails plugin that assists with forms. It provides a way
-to wrap certain things with HTML elements by using Ruby and Ruby blocks. A picture
-(or an example) is worth a thousand words...
+to wrap certain things with HTML elements by using Ruby and Ruby blocks. As a designer
+who loves Ruby, it only makes my life easier.
+
+A picture (or an example) is worth a thousand words...
 
 h2. Examples
 
@@ -13,11 +15,7 @@ If you did:
     // form stuff
     <%= form.submission 'Save Project' %>
   <% end %>
-</code></pre>
-
-You'd get:
-
-<pre><code>
+  
   <form ... >
     // form stuff
     <p class="submission">
@@ -26,22 +24,18 @@ You'd get:
   </form>
 </code></pre>
 
-Probably the most useful (I think) is the @cancel@ method, which automatically provides
-a redirect_to :back type of thing.
+Probably the most useful method (I think) is the @cancel@ method, which automatically provides
+a redirect back to wherever the user came from.
 
 <pre><code>
-You do...
   <%= form.cancel %>
 
-To get...
   <span class="cancel">
     <a href="...">Cancel</a>
   </span>
 
-You do...
-  <%= form.cancle 'Go Back' %>
+  <%= form.cancel 'Go Back' %>
 
-To get...
   <span class="cancel">
     <a href="...">Go Back</a>
   </span>
@@ -55,11 +49,7 @@ be to wrap those fields up in a "required" div. You could do that like so:
   <% form.required do %>
     // required fields
   <% end %>
-</code></pre>
-
-It would give you:
-
-<pre><code>
+  
   <div class="required">
     // required fields
   </div>
@@ -93,9 +83,9 @@ with an empty space:
 
 Pretty simple stuff. There are also @div@, @p@, and @span@ methods that pretty much do the same thing.
 However, I'm debating whether or not they belong in this plugin, as they may make more sense in a general
-view plugin. If they come up missing, you know why.
+view plugin (not really exclusive to forms). If they come up missing, you know why.
 
-The good thing is that I've built this plugin with the ease of extending in mind, so it's rather simple to
-add whatever methods you want.
+I've built this plugin with the ease of extending in mind, so it's rather simple to add whatever methods you want.
+Go crazy!
 
 (c) 2008 Ryan Heath, released under the MIT license
