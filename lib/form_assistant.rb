@@ -119,6 +119,10 @@ module RPH
       #   <div class="admin operations">
       #     // admin operations stuff
       #   </div>
+      # 
+      # TODO: remove div, p, and span methods, and allow the method_missing
+      #       hook to define them on the fly (this would feel more like a true
+      #       form assistant)
       def method_missing(method, *args, &block)
         super(method, *args) unless block_given?
         
