@@ -55,8 +55,9 @@ be to wrap those fields up in a "required" div. You could do that like so:
   </div>
 </code></pre>
 
-In fact, anything that you call on the @form@ object would convert to the CSS class of a div
-wrapper. And if you had underscored methods, they would be dasherized by default:
+In fact, anything that you call on the @form@ object (that isn't already defined) would be 
+converted to the CSS class of a div wrapper. And if you had underscored methods, they would 
+be dasherized by default:
 
 <pre><code>
   <% form.required_fields do %>
@@ -86,6 +87,6 @@ However, I'm debating whether or not they belong in this plugin, as they may mak
 view plugin (not really exclusive to forms). If they come up missing, you know why.
 
 I've built this plugin with the ease of extending in mind, so it's rather simple to add whatever methods you want.
-Go crazy!
+Just add public methods in @form_assistant.rb@ following the same pattern as the existing methods. Now, go crazy!
 
 (c) 2008 Ryan Heath, released under the MIT license
