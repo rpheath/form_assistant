@@ -1,13 +1,101 @@
-FormAssistant
-=============
+h1. FormAssistant
 
-Introduction goes here.
+This is an easily extendible Rails plugin that assists with forms. It provides a way
+to wrap certain things with HTML elements by using Ruby and Ruby blocks. A picture
+(or an example) is worth a thousand words...
 
+h2. Examples
 
-Example
-=======
+If you did:
 
-Example goes here.
+<pre><code>
+  <% form_for @project do |form| %>
+    // form stuff
+    <%= form.submission 'Save Project' %>
+  <% end %>
+</code></pre>
 
+You'd get:
 
-Copyright (c) 2008 [name of plugin creator], released under the MIT license
+<pre><code>
+  <form ... >
+    // form stuff
+    <p class="submission">
+      <input type="submit" value="Save Project" ... />
+    </p>
+  </form>
+</code></pre>
+
+Probably the most useful (I think) is the @cancel@ method, which automatically provides
+a redirect_to :back type of thing.
+
+<pre><code>
+You do...
+  <%= form.cancel %>
+
+To get...
+  <span class="cancel">
+    <a href="...">Cancel</a>
+  </span>
+
+You do...
+  <%= form.cancle 'Go Back' %>
+
+To get...
+  <span class="cancel">
+    <a href="...">Go Back</a>
+  </span>
+</code></pre>
+
+Another handy thing the form assistant provides, is "on-the-fly" wrapping. So if you had
+a section of your form that had all of the "required" fields, one way to handle that would
+be to wrap those fields up in a "required" div. You could do that like so:
+
+<pre><code>
+  <% form.required do %>
+    // required fields
+  <% end %>
+</code></pre>
+
+It would give you:
+
+<pre><code>
+  <div class="required">
+    // required fields
+  </div>
+</code></pre>
+
+In fact, anything that you call on the @form@ object would convert to the CSS class of a div
+wrapper. And if you had underscored methods, they would be dasherized by default:
+
+<pre><code>
+  <% form.required_fields do %>
+    // required fields
+  <% end %>
+  
+  <div class="required-fields">
+    // required fields
+  </div>
+</code></pre>
+
+If you'd rather have "required" and "fields" as separate CSS classes, pass the :glue option 
+with an empty space:
+
+<pre><code>
+  <% form.required_fields :glue => ' ' %>
+    // required fields
+  <% end %>
+  
+  <div class="required fields">
+    // required fields
+  </div>
+</code></pre>
+
+Pretty simple stuff. There are also @div@, @p@, and @span@ methods that pretty much do the same thing.
+However, I'm debating whether or not they belong in this plugin, as they may make more sense in a general
+view plugin. If they come up missing, you know why.
+
+The good thing is that I've built this plugin with the ease of extending in mind, so it's rather simple to
+add whatever methods you want.
+
+(c) 2008 Ryan Heath, released under the MIT license
