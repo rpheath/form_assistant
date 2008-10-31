@@ -88,5 +88,25 @@ module RPH
         end
       end
     end
+    
+    # mixes into ActionView::Base
+    module InstanceMethods
+      private
+        def form_for_with_builder(record_or_name_or_array, builder, *args, &proc)
+          options = (args.detect { |arg| arg.is_a?(Hash) } || {}).merge! :builder => builder
+          args << options
+        
+          form_for(record_or_name_or_array, *args, &proc)
+        end
+      
+      public
+        def custom_form_for(record_or_name_or_array, *args, &proc)
+          form_for_with_builder(record_or_name_or_array, RPH::FormAssistant::FormBuilder, *args, &proc)
+        end
+      
+        def custom_inline_error_form_for(record_or_name_or_array, *args, &proc)
+          form_for_with_builder(record_or_name_or_array, RPH::FormAssistant::InlineErrorFormBuilder, *args, &proc)
+        end
+    end
   end   
 end

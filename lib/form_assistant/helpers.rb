@@ -113,6 +113,7 @@ module RPH
       
       module ClassMethods
         protected
+          # convenience method for accessing available helpers
           def form_helpers
             ::RPH::FormAssistant::FORM_HELPERS
           end
