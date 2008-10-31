@@ -1,5 +1,6 @@
 module RPH
   module FormAssistant
+    # class used to DRY up error handling
     class Error < RuntimeError
       def self.message(msg=nil)
         msg.nil? ? @message : self.message = msg 
@@ -10,7 +11,6 @@ module RPH
       end
     end
     
-    class InvalidAttributes < Error
-      message "Must pass a Hash of attributes to having()" end
+    # custom errors go here
   end
 end
