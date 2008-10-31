@@ -11,6 +11,8 @@ end
 # my patterns that I've laid out here.
 module RPH
   module FormAssistant
+    ELEMENTS = [:div, :span, :p].freeze
+    
     private
       # wrapper(): used to easily add new methods to the FormAssistant
       #
@@ -28,33 +30,7 @@ module RPH
         Collector.wrap(e).having(attrs).around(content).for(@template, binding)
       end
       
-    public
-      # div(): used to wrap a div around a block of content
-      # 
-      # Parameters:
-      #   attrs   - the attributes for the <div> element
-      #   &block  - the block of content that the <div> should wrap
-      #
-      # Ex:
-      #   <% form_for @project do |form| %>
-      #     <%= form.div :class => 'admin' do %>
-      #       // your content
-      #     <% end %>
-      #   <% end %>
-      def div(attrs = {}, &block)
-        wrapper(:div, attrs, @template.capture(&block), block.binding)
-      end
-      
-      # see div()
-      def p(attrs = {}, &block)
-        wrapper(:p, attrs, @template.capture(&block), block.binding)
-      end
-      
-      # see div() or p()
-      def span(attrs = {}, &block)
-        wrapper(:span, attrs, @template.capture(&block), block.binding)
-      end
-      
+    public      
       # submission(): used to generate the 'submit' button on a form
       # 
       # Parameters:
@@ -119,16 +95,18 @@ module RPH
       #   <div class="admin operations">
       #     // admin operations stuff
       #   </div>
-      # 
-      # TODO: remove div, p, and span methods, and allow the method_missing
-      #       hook to define them on the fly (this would feel more like a true
-      #       form assistant)
       def method_missing(method, *args, &block)
         super(method, *args) unless block_given?
+
+        options, attrs, element = (args.last.is_a?(Hash) ? args.pop : {}), {}, nil
         
-        options = args.last.is_a?(Hash) ? args.pop : {}
-        css = { :class => method.to_s.downcase.gsub('_', options[:glue] || '-') }
-        wrapper(:div, css, @template.capture(&block), block.binding)
+        if ELEMENTS.include?(method.to_sym)
+          attrs, element = options, method
+        else 
+          attrs, element = { :class => method.to_s.downcase.gsub('_', options[:glue] || '-') }, :div 
+        end
+        
+        wrapper(element, attrs, @template.capture(&block), block.binding)
       end
   end
 end
