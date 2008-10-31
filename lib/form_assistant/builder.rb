@@ -5,7 +5,14 @@ module RPH
       # based on the collection it was handed
       class Builder
         attr_reader :collection
+      
+      private
+        def binding_required
+          !!((Object.const_defined?(:Rails) && Rails.respond_to?(:version) ? 
+              Rails.version : RAILS_GEM_VERSION) < '2.2.0')
+        end
         
+      public  
         # convenience method to build output from a collection
         def self.build(collection)
           new(collection)
@@ -26,7 +33,7 @@ module RPH
           content = collection[2]
           
           content_tag = template.content_tag(element, content, options)
-          binding ? template.concat(content_tag, binding) : content_tag
+          binding ? (binding_required ? template.concat(content_tag, binding) : template.concat(content_tag)) : content_tag
         end
       end
   end
