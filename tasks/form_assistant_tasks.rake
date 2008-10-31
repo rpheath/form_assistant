@@ -12,7 +12,7 @@ namespace :form_assistant do
 
     forms.each do |partial|
       file_to_copy = File.join(DESTINATION, '/', File.basename(partial))
-      puts " * Copying form_assistant%-#{longest_filename}s to %s" % 
+      puts " - form_assistant%-#{longest_filename}s copied to %s" % 
         [partial.gsub(PLUGIN_ROOT, ''), DESTINATION.gsub(RAILS_ROOT, '')]
       FileUtils.cp [partial], DESTINATION    
     end
