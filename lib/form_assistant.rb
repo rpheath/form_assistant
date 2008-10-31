@@ -30,9 +30,12 @@ module RPH
             # pull out the options
             options = args.detect { |arg| arg.is_a?(Hash) } || {}
             
-            # allow for a more convenient way to set custom label text
             options[:label] ||= {}
-            options[:label].merge!({:text => options.delete(:label_text)}) if options[:label_text]
+            # allow for a more convenient way to set common label options
+            %w(text class).each do |option|
+              label_option = "label_#{option}".to_sym
+              options[:label].merge!(option.to_sym => options.delete(label_option)) if options[label_option]
+            end
             
             # return the fields
             label_with_field = label(field, options[:label].delete(:text), options.delete(:label)) + super
