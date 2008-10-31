@@ -11,7 +11,7 @@ end
 # my patterns that I've laid out here.
 module RPH
   module FormAssistant
-    class Buildee < ActionView::Helpers::FormBuilder
+    class FormBuilder < ActionView::Helpers::FormBuilder
       include RPH::FormAssistant::Helpers
       
       (field_helpers + 
