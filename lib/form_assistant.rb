@@ -75,7 +75,7 @@ module RPH
       
       # render the appropriate partial based on whether or not
       # the field has any errors
-      def build(field)
+      def render_partial_for(field)
         @template.capture do
           locals = { :field_with_label => yield }
           
