@@ -14,12 +14,25 @@ module RPH
     class FormBuilder < ActionView::Helpers::FormBuilder
       include RPH::FormAssistant::Helpers
       
+      cattr_accessor :wrap_fields_with_paragraph_tag
+    
+    private
+      def label_for(field, options)
+        label(field, options.delete(:text), options)
+      end
+      
+    public
       (field_helpers + 
         %w(date_select datetime_select time_select collection_select select country_select time_zone_select) - 
         %w(hidden_field label fields_for)).each do |name|
           define_method(name) do |field, *args|
-            options = args.last.is_a?(Hash) ? args.pop : {}
-            @template.content_tag(:p, label(field) + super)
+            options = args.detect { |arg| arg.is_a?(Hash) } || {}
+            # allow for a more convenient way to set custom label text
+            (options[:label] ||= {}).merge!({:text => options[:label_text]}) if options[:label_text]
+            
+            # return the fields
+            label_with_field = label_for(field, options.delete(:label) || {}) + super
+            wrap_fields_with_paragraph_tag ? @template.content_tag(:p, label_with_field) : label_with_field
           end
         end
     end
