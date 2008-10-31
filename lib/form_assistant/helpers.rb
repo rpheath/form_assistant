@@ -1,7 +1,19 @@
 module RPH
   module FormAssistant
+    # stores all form helpers
+    FORM_HELPERS = [
+      ActionView::Helpers::FormBuilder.field_helpers + 
+      %w(date_select datetime_select time_select collection_select select country_select time_zone_select) - 
+      %w(hidden_field label fields_for)
+    ].flatten.freeze
+    
     module Helpers
       ELEMENTS = [:div, :span, :p].freeze
+      
+      # extend convenience methods
+      def self.included(receiver)
+        receiver.extend ClassMethods
+      end
       
     private
       # wrapper(): used to easily add new methods to the FormAssistant
@@ -97,6 +109,13 @@ module RPH
         end
 
         wrapper(element, attrs, @template.capture(&block), block.binding)
+      end
+      
+      module ClassMethods
+        protected
+          def form_helpers
+            ::RPH::FormAssistant::FORM_HELPERS
+          end
       end
     end
   end
