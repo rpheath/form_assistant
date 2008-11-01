@@ -1,92 +1,39 @@
 h1. FormAssistant
 
-This is an easily extendible Rails plugin that assists with forms. It provides a way
-to wrap certain things with HTML elements by using Ruby and Ruby blocks. As a designer
-who loves Ruby, it only makes my life easier.
+This is a Rails plugin that essentially provides two form builder's:
 
-A picture (or an example) is worth a thousand words...
+* @RPH::FormAssistant::FormBuilder@
+** Provides a couple new form helpers in addition to a method_missing hook that allows content to be wrapped in HTML elements "on the fly". Also, all form helpers have labels attached to them automatically.
+* @RPH::FormAssistant::InlineErrorFormBuilder@
+** Extends @RPH::FormAssistant::FormBuilder@ to attach field errors to the field itself, avoiding the need for the other option: @<%= error_messages_for :object %>@
+
+Once installed, it's easy to use either form builder via the following methods:
+
+<pre><code><% form_assistant_for @project do |form| %>
+  // typical form_for stuff
+<% end %>
+
+<% inline_error_form_assistant_for @project do |form| %>
+  // typical form_for stuff
+<% end %>
+</code></pre>
+
+That's all you have to do. If you don't think you'll be using the regular form assistant on one form, and the inline error form assistant on another, you can set which default builder to use across your entire application like so:
+
+<pre><code>ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder
+ActionView::Base.default_form_builder = RPH::FormAssistant::InlineErrorFormBuilder
+</code></pre>
+
+The @InlineErrorFormBuilder@ uses partials to style the fields with and without errors, which is an extremely flexible way to keep your forms DRY. The form partials are kept in app/views/forms. To get started, run the following rake task from your project root:
+
+<pre><code>$> rake form_assistant:install</code></pre>
+
+That will put some example form partials in app/views/forms/*.
 
 h2. Examples
 
-If you did:
 
-<pre><code>
-  <% form_for @project do |form| %>
-    // form stuff
-    <%= form.submission 'Save Project' %>
-  <% end %>
-  
-  <form ... >
-    // form stuff
-    <p class="submission">
-      <input type="submit" value="Save Project" ... />
-    </p>
-  </form>
-</code></pre>
 
-Probably the most useful method (I think) is the @cancel@ method, which automatically provides
-a redirect back to wherever the user came from.
-
-<pre><code>
-  <%= form.cancel %>
-
-  <span class="cancel">
-    <a href="...">Cancel</a>
-  </span>
-
-  <%= form.cancel 'Go Back' %>
-
-  <span class="cancel">
-    <a href="...">Go Back</a>
-  </span>
-</code></pre>
-
-Another handy thing the form assistant provides, is "on-the-fly" wrapping. So if you had
-a section of your form that had all of the "required" fields, one way to handle that would
-be to wrap those fields up in a "required" div. You could do that like so:
-
-<pre><code>
-  <% form.required do %>
-    // required fields
-  <% end %>
-  
-  <div class="required">
-    // required fields
-  </div>
-</code></pre>
-
-In fact, anything that you call on the @form@ object (that isn't already defined) would be 
-converted to the CSS class of a div wrapper. And if you had underscored methods, they would 
-be dasherized by default:
-
-<pre><code>
-  <% form.required_fields do %>
-    // required fields
-  <% end %>
-  
-  <div class="required-fields">
-    // required fields
-  </div>
-</code></pre>
-
-If you'd rather have "required" and "fields" as separate CSS classes, pass the :glue option 
-with an empty space:
-
-<pre><code>
-  <% form.required_fields :glue => ' ' %>
-    // required fields
-  <% end %>
-  
-  <div class="required fields">
-    // required fields
-  </div>
-</code></pre>
-
-Pretty simple stuff. There are also @div@, @p@, and @span@ methods that pretty much do the same thing.
-However, I'm debating whether or not they belong in this plugin, as they may make more sense in a general
-view plugin (not really exclusive to forms). If they come up missing, you know why.
-
-I've built this plugin with the ease of extending in mind, so it's rather simple to add whatever methods you want.
-Just add public methods in @form_assistant.rb@ following the same pattern as the existing methods. Now, go crazy!
+h2. Licensing
 
 (c) 2008 Ryan Heath, released under the MIT license
