@@ -32,6 +32,8 @@ module RPH
           options = collection[1]
           content = collection[2]
           
+          # accommodates the changes in Rails 2.2.0 where
+          # the binding is no longer required by concat()
           content_tag = template.content_tag(element, content, options)
           binding ? (binding_required ? template.concat(content_tag, binding) : template.concat(content_tag)) : content_tag
         end
