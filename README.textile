@@ -69,6 +69,34 @@ That works for all form helpers (text_area, checkbox, etc).
 <span class="errors">cannot be blank</span>
 </code></pre>
 
+The form assistant also provides a cancel() helper that will allow the user to go back to the previous screen, automatically.
+
+<pre><code><%= form.cancel %>
+
+<span class="cancel">
+  <a href="/wherever/the/user/came/from">Cancel</a>
+</span>
+
+# other options:
+<%= form.cancel 'Go Back' %>
+<%= form.cancel 'Nevermind', :url => some_path %>
+<%= form.cancel 'Go Back', :attrs => { :class => 'go-back' } %>
+</code></pre>
+
+I usually like to give my submit buttons special attention, and so does form assistant:
+
+<pre><code><%= form.submission %>
+
+<p class="submission">
+  <input type="submit" value="Save Changes" ... />
+</p>
+
+# other options:
+<%= form.submission 'Save Project' %>
+<%= form.submission 'Save', :class => 'button' %>
+<%= form.submission 'Save', :attrs => { :class => 'submit-wrapper' } %>
+</code></pre>
+
 Here are a few bonus features:
 
 <pre><code><% form.div :class => 'admin' do %>
