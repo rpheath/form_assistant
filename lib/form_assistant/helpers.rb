@@ -8,9 +8,10 @@ module RPH
     ].flatten.freeze
     
     module Helpers
+      # used to check against methods
+      # called via the method_missing hook
       ELEMENTS = [:div, :span, :p].freeze
       
-      # extend convenience methods
       def self.included(receiver)
         receiver.extend ClassMethods
       end
@@ -19,16 +20,18 @@ module RPH
       # wrapper(): used to easily add new methods to the FormAssistant
       #
       # Parameters:
-      #   e         - the element that wraps the content
-      #   attrs     - the attributes for that element (class, id, etc)
-      #   content   - the actual content to wrap
-      #   binding   - optional binding (required if a block is passed)
+      #   e       - the element that wraps the content
+      #   attrs   - the attributes for that element (class, id, etc)
+      #   content - the actual content to wrap
+      #   binding - optional binding (required if a block is passed)
       #
       # Ex:
       #   def span(attrs = {}, &block)
       #     wrapper(:span, attrs, @template.capture(&block), block.binding)
       #   end
       def wrapper(e, attrs, content, binding = nil)
+        # wraps an element having certain attributes around some
+        # content for a template (in case you didn't realize that)
         Collector.wrap(e).having(attrs).around(content).for(@template, binding)
       end
       
@@ -45,6 +48,15 @@ module RPH
       #     // form stuff
       #     <%= form.submission 'Save Project' %>
       #   <% end %>
+      #
+      #   Note: use :attrs => { ... } to target the surrounding <p> tag
+      #   <%= form.submission 'Save Project', :attrs => { :class => 'submit' } %>
+      #
+      #   <p class="submit">
+      #     <input type="submit" value="Save Project" ... />
+      #   </p>
+      # 
+      #   (other options will apply to the submit input)
       def submission(value = 'Save Changes', options = {})
         wrapper(:p, { :class => 'submission' }.merge!(options.delete(:attrs) || {}), self.submit(value, options))
       end
@@ -97,17 +109,32 @@ module RPH
       #   <div class="admin operations">
       #     // admin operations stuff
       #   </div>
+      #
+      # Note: special attention has been given to certain HTML elements
+      # 
+      # <%= form.div :class => 'separator' do %>
+      #   // div content
+      # <% end %>
+      #
+      # <div class="separator">
+      #   // div content
+      # </div>
+      #
+      # Other options include:
+      #   <%= form.p :class => 'whatever', :id => 'dom_id' do %>
+      #   <%= form.span :class => 'note' do %>
+      #
       def method_missing(method, *args, &block)
         super(method, *args) unless block_given?
-
         options, attrs, element = (args.last.is_a?(Hash) ? args.pop : {}), {}, nil
 
+        # handle methods separately if they match the pre-defined elements
         if ELEMENTS.include?(method.to_sym)
           attrs, element = options, method
         else 
           attrs, element = { :class => method.to_s.downcase.gsub('_', options[:glue] || '-') }, :div 
         end
-
+        
         wrapper(element, attrs, @template.capture(&block), block.binding)
       end
       
