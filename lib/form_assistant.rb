@@ -6,15 +6,15 @@ end
 module RPH
   # FormAssistant is currently made up of two custom FormBuilder's:
   #
-  #   1) FormAssistant::FormBuilder
-  #       - provides several convenient helpers (see helpers.rb)
-  #       - method_missing hook to wrap content "on the fly"
-  #       - labels automatically attached to field helpers
+  #   FormAssistant::FormBuilder
+  #     - provides several convenient helpers (see helpers.rb)
+  #     - method_missing hook to wrap content "on the fly"
+  #     - labels automatically attached to field helpers
   #
-  #   2) FormAssistant::InlineErrorFormBuilder
-  #       - inherits from FormBuilder, so has all of the above functionality
-  #       - provides errors inline with the field that wraps it
-  #       - uses partials (in views/forms/) to style fields
+  #   FormAssistant::InlineErrorFormBuilder
+  #     - inherits from FormBuilder, so has all of the above functionality
+  #     - provides errors inline with the field that wraps it
+  #     - uses partials (in views/forms/) to style fields
   #
   # The idea is to make forms extremely less painful and a lot more DRY
   module FormAssistant
