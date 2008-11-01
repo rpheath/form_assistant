@@ -39,7 +39,7 @@ Here are a few reasons why it's worth using the form assistant.
 I'm going to refer to a @form@ object in the examples. Assume this object is yielded back to the block of a form assistant call, like so:
 
 <pre><code><% inline_error_form_assistant_for @project do |form| %>
-  // from stuff
+  // the 'form' object would be used in here
 <% end %>
 </code></pre>
 
@@ -101,6 +101,7 @@ Now, an easier way to wrap a div around content:
 <div class="admin operations">
   // admin operations
 </div>
+</code></pre>
 
 These helpers can be found in lib/form_assistant/helpers.rb. It was designed for extensibility, so please go crazy adding your own helpers! (see how easy it is by the existing implementations)
 
