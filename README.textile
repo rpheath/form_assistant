@@ -84,7 +84,7 @@ Here are a few bonus features:
 <% form.span :class => 'highlight' do %>
 </code></pre>
 
-Now, an easier way to wrap a <div> around content:
+Now, an easier way to wrap a div around content:
 
 <pre><code><% form.admin_operations do %>
   // admin-operations
