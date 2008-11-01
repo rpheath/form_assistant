@@ -5,7 +5,7 @@ This is a Rails plugin that essentially provides two form builder's:
 * @RPH::FormAssistant::FormBuilder@
 ** Provides a couple new form helpers in addition to a method_missing hook that allows content to be wrapped in HTML elements "on the fly". Also, all form helpers have labels attached to them automatically.
 * @RPH::FormAssistant::InlineErrorFormBuilder@
-** Extends @RPH::FormAssistant::FormBuilder@ to attach field errors to the field itself, avoiding the need for the other option: @<%= error_messages_for :object %>@
+** Extends @RPH::FormAssistant::FormBuilder@ to attach field errors to the field itself, avoiding the need for @error_messages_for@.
 
 Once installed, it's easy to use either form builder via the following methods:
 
@@ -24,6 +24,8 @@ That's all you have to do. If you don't think you'll be using the regular form a
 ActionView::Base.default_form_builder = RPH::FormAssistant::InlineErrorFormBuilder
 </code></pre>
 
+Then all of your @form_for@ calls will automatically use the specified builder.
+
 The @InlineErrorFormBuilder@ uses partials to style the fields with and without errors, which is an extremely flexible way to keep your forms DRY. The form partials are kept in app/views/forms. To get started, run the following rake task from your project root:
 
 <pre><code>$> rake form_assistant:install</code></pre>
@@ -32,7 +34,77 @@ That will put some example form partials in app/views/forms/*.
 
 h2. Examples
 
+Here are a few reasons why it's worth using the form assistant.
 
+I'm going to refer to a @form@ object in the examples. Assume this object is yielded back to the block of a form assistant call, like so:
+
+<pre><code><% inline_error_form_assistant_for @project do |form| %>
+  // from stuff
+<% end %>
+</code></pre>
+
+Now, the examples:
+
+<pre><code># doing this
+<%= form.text_field :title %>
+
+# would render
+<label for="project_title">Title</label>
+<input type="text" id="project_title" name="project[title]" />
+
+# other options:
+<%= form.text_field :title, :label_text => 'Project Title' %>
+<%= form.text_field :title, :label_class => 'required' %>
+<%= form.text_field :title, :label => { :text => 'Project Title', :class => 'required' } %>
+</code></pre>
+
+That works for all form helpers (text_area, checkbox, etc).
+
+<pre><code># a field that happens to have an error
+<%= form.text_field :title, :label => { :text => 'Name', :class => 'required' } %>
+
+# would render
+<label class="required" for="project_title">Name</label>
+<input type="text" id="project_title" name="project[title]" value="" />
+<span class="errors">cannot be blank</span>
+</code></pre>
+
+Here are a few bonus features:
+
+<pre><code><% form.div :class => 'admin' do %>
+  // admin fields
+<% end %>
+
+<div class="admin">
+  // admin fields
+</div>
+
+# other options:
+<% form.p :id => 'notice' do %>
+<% form.span :class => 'highlight' do %>
+</code></pre>
+
+Now, an easier way to wrap a <div> around content:
+
+<pre><code><% form.admin_operations do %>
+  // admin-operations
+<% end %>
+
+<div class="admin-operations">
+  // admin-operations
+</div>
+
+<% form.admin_operations :glue => ' ' do %>
+  // admin operations
+<% end %>
+
+<div class="admin operations">
+  // admin operations
+</div>
+
+These helpers can be found in lib/form_assistant/helpers.rb. It was designed for extensibility, so please go crazy adding your own helpers! (see how easy it is by the existing implementations)
+
+Enjoy keeping your forms DRY.
 
 h2. Licensing
 
