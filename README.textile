@@ -3,7 +3,7 @@ h1. FormAssistant
 This is a Rails plugin that essentially provides two form builder's:
 
 * @RPH::FormAssistant::FormBuilder@
-** Provides a couple new form helpers in addition to a method_missing hook that allows content to be wrapped in HTML elements "on the fly". Also, all form helpers have labels attached to them automatically.
+** Provides a method_missing hook that allows content to be wrapped in HTML elements "on the fly", in addition to some helpful things like automatic "cancel" links and so on. Also, all of the traditional form helpers have labels attached to them automatically.
 * @RPH::FormAssistant::InlineErrorFormBuilder@
 ** Extends @RPH::FormAssistant::FormBuilder@ to attach field errors to the field itself, avoiding the need for @error_messages_for@.
 
