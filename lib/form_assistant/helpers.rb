@@ -77,7 +77,7 @@ module RPH
           :text => (args.first if args.first.is_a?(String)) || 'Cancel',
           :path => (@template.request.env['HTTP_REFERER'] || @template.send("#{@object_name.to_s.pluralize}_path")),
           :attrs => { :class => 'cancel' }
-        }.merge!(args.last.is_a?(Hash) ? args.pop : {})
+        }.merge!(args.detect { |arg| arg.is_a?(Hash) } || {})
 
         wrapper(:span, options.delete(:attrs), @template.link_to(options.delete(:text), options.delete(:path), options))
       end
@@ -126,7 +126,7 @@ module RPH
       #
       def method_missing(method, *args, &block)
         super(method, *args) unless block_given?
-        options, attrs, element = (args.last.is_a?(Hash) ? args.pop : {}), {}, nil
+        options, attrs, element = (args.detect { |arg| arg.is_a?(Hash) } || {}), {}, nil
 
         # handle methods separately if they match the pre-defined elements
         if ELEMENTS.include?(method.to_sym)

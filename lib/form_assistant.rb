@@ -124,7 +124,8 @@ module RPH
         def form_for_with_builder(record_or_name_or_array, builder, *args, &proc)
           options = (args.detect { |arg| arg.is_a?(Hash) } || {}).merge! :builder => builder
           args << options
-        
+          
+          # hand control over to the regular form_for()
           form_for(record_or_name_or_array, *args, &proc)
         end
       
