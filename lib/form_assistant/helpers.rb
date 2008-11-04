@@ -132,7 +132,7 @@ module RPH
         if ELEMENTS.include?(method.to_sym)
           attrs, element = options, method
         else 
-          attrs, element = { :class => method.to_s.downcase.gsub('_', options[:glue] || '-') }, :div 
+          attrs, element = { :class => method.to_s.downcase.gsub('_', options[:glue] || ' ') }, :div 
         end
         
         wrapper(element, attrs, @template.capture(&block), block.binding)
