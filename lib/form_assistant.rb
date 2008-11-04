@@ -46,7 +46,7 @@ module RPH
           
           options[:label] ||= {}
           # allow for a more convenient way to set common label options
-          %w(text class).each do |option|
+          %w(id class text).each do |option|
             label_option = "label_#{option}".to_sym
             options[:label].merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
