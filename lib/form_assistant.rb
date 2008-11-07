@@ -127,6 +127,11 @@ module RPH
           # hand control over to the regular form_for()
           form_for(record_or_name_or_array, *args, &proc)
         end
+        
+        # determines if binding is needed for #concat()
+        def binding_required
+          RPH::FormAssistant::Assistant.binding_required?
+        end
       
       public
         # easy way to make use of FormAssistant::FormBuilder
@@ -144,8 +149,7 @@ module RPH
           partial = render(:partial => 'forms/fieldset', :locals => locals)
           
           # render the fields
-          RPH::FormAssistant::Assistant.binding_required? ? 
-            concat(partial, block.binding) : concat(partial)
+          binding_required ? concat(partial, block.binding) : concat(partial)
         end
     end
   end   
