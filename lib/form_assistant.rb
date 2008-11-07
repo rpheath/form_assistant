@@ -51,8 +51,16 @@ module RPH
             options[:label].merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
           
+          # consider trailing labels
+          label_with_field = if %w(check_box radio_button).include?(name)
+            label_options = options.delete(:label)
+            label_options[:class] = (label_options[:class].to_s + ' inline').strip
+            super + label(field, label_options.delete(:text), label_options)
+          else
+            label(field, options[:label].delete(:text), options.delete(:label)) + super
+          end
+          
           # return the fields
-          label_with_field = label(field, options[:label].delete(:text), options.delete(:label)) + super
           self.class.wrap_fields_with_paragraph_tag ? @template.content_tag(:p, label_with_field) : label_with_field
         end
       end
