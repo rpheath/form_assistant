@@ -8,11 +8,10 @@ module RPH
       
       private
         def binding_required
-          !!((Object.const_defined?(:Rails) && Rails.respond_to?(:version) ? 
-              Rails.version : RAILS_GEM_VERSION) < '2.2.0')
+          RPH::FormAssistant::Assistant.binding_required?
         end
-        
-      public  
+      
+      public
         # convenience method to build output from a collection
         def self.build(collection)
           new(collection)
@@ -33,7 +32,7 @@ module RPH
           content = collection[2]
           
           # accommodates the changes in Rails 2.2.0 where
-          # the binding is no longer required by concat()
+          # the binding is no longer required by #concat()
           content_tag = template.content_tag(element, content, options)
           binding ? (binding_required ? template.concat(content_tag, binding) : template.concat(content_tag)) : content_tag
         end

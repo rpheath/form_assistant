@@ -1,4 +1,4 @@
-%w(error builder collector helpers).each do |f|
+%w(error assistant builder collector helpers).each do |f|
   require File.join(File.dirname(__FILE__), 'form_assistant', f)
 end
 
@@ -12,24 +12,32 @@ module RPH
     #   * labels automatically attached to field helpers
     #   * format fields using partials (extremely extensible)
     # 
-    # <% form_for @project, :builder => RPH::FormAssistant::FormBuilder do |form| %>
-    #   // fancy form stuff
-    # <% end %>
+    # Usage:
     #
-    # - or -
+    #   <% form_for @project, :builder => RPH::FormAssistant::FormBuilder do |form| %>
+    #     // fancy form stuff
+    #   <% end %>
+    #
+    #   - or -
     # 
-    # <% form_assistant_for @project do |form| %>
-    #   // fancy form stuff
-    # <% end %>
+    #   <% form_assistant_for @project do |form| %>
+    #     // fancy form stuff
+    #   <% end %>
     class FormBuilder < ActionView::Helpers::FormBuilder
       include RPH::FormAssistant::Helpers
       cattr_accessor :ignore_templates
+      cattr_accessor :include_inline_errors
+      
+      # used if no other template is available
       attr_accessor_with_default :fallback_template, 'field'
       
       # if set to true, none of the templates in app/views/forms/ will
       # be used; however, labels will still be automatically attached
       # and all FormAssistant helpers are still avaialable
       self.ignore_templates = false
+      
+      # set to false if you'd rather use #error_messages_for()
+      self.include_inline_errors = true
       
       # override the field_error_proc so that it no longer wraps the field
       # with <div class="fieldWithErrors">...</div>, but just returns the field
@@ -50,32 +58,29 @@ module RPH
       
       # checks to make sure the template exists
       def template_exists?(template)
-        File.exists?(File.join(Rails.root, '/app/views/forms', '_' + template + '.html.erb'))
+        partial = "_#{template}.html.erb"
+        File.exists?(File.join(Rails.root, '/app/views/forms', partial))
       end
       
     protected
       # render the appropriate partial based on whether or not
       # the field has any errors
-      def render_partial_for(field, label, tip, template, args, include_errors = true)
-        @template.capture do
-          errors = include_errors ? error_message_for(field) : nil
-          locals = { :field => field, :label => label, :errors => errors, :tip => tip }
-          
-          # render the appropriate partial from app/views/forms/
-          @template.render :partial => "forms/#{template}", :locals => locals
-        end
+      def render_partial_for(element, field, label, tip, template, args)
+        errors = self.class.include_inline_errors ? error_message_for(field) : nil
+        locals = { :element => element, :label => label, :errors => errors, :tip => tip }
+        
+        # render the appropriate partial from app/views/forms/
+        @template.render :partial => "forms/#{template}", :locals => locals
       end
       
       def render_field_with_label(element, field, name, options)
-        @template.capture do
-          # consider trailing labels
-          label_with_field = if %w(check_box radio_button).include?(name)
-            label_options = options.delete(:label)
-            label_options[:class] = (label_options[:class].to_s + ' inline').strip
-            element + label(field, label_options.delete(:text), label_options)
-          else
-            label(field, options[:label].delete(:text), options.delete(:label)) + element
-          end
+        # consider trailing labels
+        label_with_field = if %w(check_box radio_button).include?(name)
+          label_options = options.delete(:label)
+          label_options[:class] = (label_options[:class].to_s + ' inline').strip
+          element + label(field, label_options.delete(:text), label_options)
+        else
+          label(field, options[:label].delete(:text), options.delete(:label)) + element
         end
       end
     
@@ -94,13 +99,19 @@ module RPH
             options[:label].merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
           
+          # build out the label element
+          label = label(field, options[:label].delete(:text), options.delete(:label))
+          
+          # grab the template
           template = options.delete(:template) || name.to_s
-          template ||= 'trailing_label_field' if %w(check_box radio_button).include?(name)
+          template ||= 'trailing_label_field' if %w(check_box radio_button).include?(template)
           template = self.fallback_template unless template_exists?(template)
-                      
+          
+          # return the helper with a label if templates are not to be used
           return render_field_with_label(super, field, name, options) if self.class.ignore_templates || template.blank?
           
-          render_partial_for super, label(field, options[:label].delete(:text), options.delete(:label)), options.delete(:tip), template, args
+          # render the template from app/views/forms/
+          render_partial_for(super, field, label, options.delete(:tip), template, args)
         end
       end
     end
@@ -125,6 +136,16 @@ module RPH
         # <% end %>
         def form_assistant_for(record_or_name_or_array, *args, &proc)
           form_for_with_builder(record_or_name_or_array, RPH::FormAssistant::FormBuilder, *args, &proc)
+        end
+        
+        # handles fieldsets
+        def fieldset(legend, &block)
+          locals = { :legend => legend, :fields => capture(&block) }
+          partial = render(:partial => 'forms/fieldset', :locals => locals)
+          
+          # render the fields
+          RPH::FormAssistant::Assistant.binding_required? ? 
+            concat(partial, block.binding) : concat(partial)
         end
     end
   end   
