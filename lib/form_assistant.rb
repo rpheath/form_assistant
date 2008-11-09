@@ -73,9 +73,10 @@ module RPH
         @template.render :partial => "forms/#{template}", :locals => locals
       end
       
+      # render the field with the label (does not use the templates)
       def render_field_with_label(element, field, name, options)
         # consider trailing labels
-        label_with_field = if %w(check_box radio_button).include?(name)
+        if %w(check_box radio_button).include?(name)
           label_options = options.delete(:label)
           label_options[:class] = (label_options[:class].to_s + ' inline').strip
           element + label(field, label_options.delete(:text), label_options)
@@ -102,13 +103,13 @@ module RPH
           # build out the label element
           label = label(field, options[:label].delete(:text), options.delete(:label))
           
+          # return the helper with a label if templates are not to be used
+          return render_field_with_label(super, field, name, options) if self.class.ignore_templates
+          
           # grab the template
           template = options.delete(:template) || name.to_s
           template ||= 'trailing_label_field' if %w(check_box radio_button).include?(template)
           template = self.fallback_template unless template_exists?(template)
-          
-          # return the helper with a label if templates are not to be used
-          return render_field_with_label(super, field, name, options) if self.class.ignore_templates || template.blank?
           
           # render the template from app/views/forms/
           render_partial_for(super, field, label, options.delete(:tip), template, args)
@@ -130,7 +131,7 @@ module RPH
         
         # determines if binding is needed for #concat()
         def binding_required
-          RPH::FormAssistant::Assistant.binding_required?
+          RPH::FormAssistant::Rules.binding_required?
         end
       
       public
@@ -144,6 +145,12 @@ module RPH
         end
         
         # handles fieldsets
+        # (borrow the #fieldset() from Chris Scharf: 
+        #   http://github.com/scharfie/slate/tree/master/app/helpers/application_helper.rb)
+        #
+        # <% fieldset 'User Registration' do %>
+        #   // fields
+        # <% end %>
         def fieldset(legend, &block)
           locals = { :legend => legend, :fields => capture(&block) }
           partial = render(:partial => 'forms/fieldset', :locals => locals)

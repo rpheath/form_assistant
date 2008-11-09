@@ -8,7 +8,7 @@ module RPH
       
       private
         def binding_required
-          RPH::FormAssistant::Assistant.binding_required?
+          RPH::FormAssistant::Rules.binding_required?
         end
       
       public
