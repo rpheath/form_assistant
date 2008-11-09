@@ -1,36 +1,22 @@
 h1. FormAssistant
 
-This is a Rails plugin that essentially provides two form builder's:
+This is a Rails plugin that provides a custom form builder that attempts to make forms somewhat friendly.
 
-# @RPH::FormAssistant::FormBuilder@
-** Provides a method_missing hook that allows content to be wrapped in HTML elements "on the fly", in addition to some helpful things like automatic "cancel" links and so on. Also, all of the traditional form helpers have labels attached to them automatically.
-# @RPH::FormAssistant::InlineErrorFormBuilder@
-** Extends @RPH::FormAssistant::FormBuilder@ to attach field errors to the field itself, avoiding the need for @error_messages_for@.
-
-Once installed, it's easy to use either form builder via the following methods:
+Once installed, use the form assistant just like #form_for():
 
 <pre><code><% form_assistant_for @project do |form| %>
   // typical form_for stuff
-<% end %>
+<% end %></code></pre>
 
-<% inline_error_form_assistant_for @project do |form| %>
-  // typical form_for stuff
-<% end %>
-</code></pre>
+Or if you'd rather use #form_for() everywhere, you can set the form assistant's builder to be your default across the entire application like so:
 
-That's all you have to do. If you don't think you'll be using the regular form assistant on one form, and the inline error form assistant on another, you can set which default builder to use across your entire application like so:
+<pre><code>ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder</code></pre>
 
-<pre><code>ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder
-ActionView::Base.default_form_builder = RPH::FormAssistant::InlineErrorFormBuilder
-</code></pre>
-
-Then all of your @form_for@ calls will automatically use the specified builder.
-
-The @InlineErrorFormBuilder@ uses partials to style the fields with and without errors, which is an extremely flexible way to keep your forms DRY. The form partials are kept in app/views/forms. To get started, run the following rake task from your project root:
+The new and improved form assistant uses partials to format your fields, labels, and errors (if any). To get started, run...
 
 <pre><code>$> rake form_assistant:install</code></pre>
 
-That will put some example form partials in app/views/forms/*.
+...from your project root. That will put some example form partials in app/views/forms/*.
 
 h2. Examples
 
@@ -38,38 +24,22 @@ Here are a few reasons why it's worth using the form assistant.
 
 I'm going to refer to a @form@ object in the examples. Assume this object is yielded back to the block of a form assistant call, like so:
 
-<pre><code><% inline_error_form_assistant_for @project do |form| %>
+<pre><code><% form_assistant_for @project do |form| %>
   // the 'form' object would be used in here
 <% end %>
 </code></pre>
 
 Now, the examples:
 
-<pre><code># doing this
-<%= form.text_field :title %>
-
-# would render
-<label for="project_title">Title</label>
-<input type="text" id="project_title" name="project[title]" />
-
-# other options:
+<pre><code># label options:
 <%= form.text_field :title, :label_text => 'Project Title' %>
 <%= form.text_field :title, :label_class => 'required' %>
 <%= form.text_field :title, :label => { :text => 'Project Title', :class => 'required' } %>
 </code></pre>
 
-That works for all form helpers (text_area, checkbox, etc).
+That works for all form helpers (text_area, check_box, etc). And by default, the label will be the humanized version of the field name, so that's what you'll get if you ignore the label options.
 
-<pre><code># a field that happens to have an error
-<%= form.text_field :title, :label => { :text => 'Name', :class => 'required' } %>
-
-# would render
-<label class="required" for="project_title">Name</label>
-<input type="text" id="project_title" name="project[title]" value="" />
-<span class="errors">cannot be blank</span>
-</code></pre>
-
-The form assistant also provides a cancel() helper that will allow the user to go back to the previous screen, automatically.
+The form assistant also provides a #cancel() helper that will allow the user to go back to the previous screen, automatically.
 
 <pre><code><%= form.cancel %>
 
