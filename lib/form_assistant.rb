@@ -108,7 +108,6 @@ module RPH
           
           # grab the template
           template = options.delete(:template) || name.to_s
-          template ||= 'trailing_label_field' if %w(check_box radio_button).include?(template)
           template = self.fallback_template unless template_exists?(template)
           
           # render the template from app/views/forms/
