@@ -37,7 +37,7 @@ By default, the form assistant will try to render a template based on the name o
 
 If a specified template doesn't exist, a fallback template will be used. Also, if you'd like to take advantage of the form assistant (automatic labels, extensible helpers, and so on) but would rather not use templates for formatting, you can turn that off easily, by doing:
 
-<pre><code># config/intializers/form_assistant.rb
+<pre><code># config/initializers/form_assistant.rb
 RPH::FormAssistant::FormBuilder.ignore_templates = true</code></pre>
 
 Another convenient thing about the form assistant is the ability to control labels from their corresponding helper. For example...
