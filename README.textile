@@ -37,13 +37,15 @@ By default, the form assistant will try to render a template based on the name o
 
 If a specified template doesn't exist, a fallback template will be used.
 
-<pre><code># label options:
-<%= form.text_field :title, :label_text => 'Project Title' %>
+Another convenient thing about the form assistant is the ability to control labels. For example...
+
+<pre><code><%= form.text_field :title, :label_text => 'Project Title' %>
 <%= form.text_field :title, :label_class => 'required' %>
-<%= form.text_field :title, :label => { :text => 'Project Title', :class => 'required' } %>
+<%= form.text_field :title, :label_id => 'dom_id' %>
+<%= form.text_field :title, :label => { :text => 'Project Title', :id => 'dom_id', :class => 'required' } %>
 </code></pre>
 
-That works for all form helpers (text_area, check_box, etc). And by default, the label will be the humanized version of the field name, so that's what you'll get if you ignore the label options.
+That works for all form helpers (text_area, check_box, etc). And by default, the label will be the humanized version of the field name, so that's what you'll get if you ignore the label options altogether.
 
 The form assistant also provides a #cancel() helper that will allow the user to go back to the previous screen, automatically.
 
