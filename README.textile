@@ -31,6 +31,12 @@ I'm going to refer to a @form@ object in the examples. Assume this object is yie
 
 Now, the examples:
 
+By default, the form assistant will try to render a template based on the name of the helper. For instance, calling <pre><code><%= form.text_field :title %></code></pre> will look for a template called _text_field.html.erb located in app/views/forms. However, you can specify a different template easily:
+
+<pre><code><%= form.text_field :title, :template => 'custom_template' %></code></pre>
+
+If a specified template doesn't exist, a fallback template will be used.
+
 <pre><code># label options:
 <%= form.text_field :title, :label_text => 'Project Title' %>
 <%= form.text_field :title, :label_class => 'required' %>
