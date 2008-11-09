@@ -1,4 +1,4 @@
-%w(error assistant builder collector helpers).each do |f|
+%w(error rules builder collector helpers).each do |f|
   require File.join(File.dirname(__FILE__), 'form_assistant', f)
 end
 
