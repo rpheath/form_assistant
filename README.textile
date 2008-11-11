@@ -42,7 +42,8 @@ RPH::FormAssistant::FormBuilder.ignore_templates = true</code></pre>
 
 Another convenient thing about the form assistant is the ability to control labels from their corresponding helper. For example...
 
-<pre><code><%= form.text_field :title, :label_text => 'Project Title' %>
+<pre><code><%= form.text_field :title, :label => 'Project Title' %>
+<%= form.text_field :title, :label_text => 'Project Title' %>
 <%= form.text_field :title, :label_class => 'required' %>
 <%= form.text_field :title, :label_id => 'dom_id' %>
 <%= form.text_field :title, :label => { :text => 'Project Title', :id => 'dom_id', :class => 'required' } %>

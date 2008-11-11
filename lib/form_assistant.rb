@@ -91,17 +91,24 @@ module RPH
       send(:form_helpers).each do |name|
         define_method name do |field, *args|
           # pull out the options
-          options = args.detect { |arg| arg.is_a?(Hash) } || {}
-
+          options, label_options = args.extract_options!, {}
           options[:label] ||= {}
+          
+          # allows for a cleaner way of setting label text (since that's the more common need)
+          # <%= form.text_field :whatever, :label => 'Whatever Title' %>
+          label_options.merge!(options[:label].is_a?(String) ? {:text => options[:label]} : options[:label])
+
           # allow for a more convenient way to set common label options
+          # <%= form.text_field :whatever, :label_id => 'dom_id' %>
+          # <%= form.text_field :whatever, :label_class => 'required' %>
+          # <%= form.text_field :whatever, :label_text => 'Whatever' %>
           %w(id class text).each do |option|
             label_option = "label_#{option}".to_sym
-            options[:label].merge!(option.to_sym => options.delete(label_option)) if options[label_option]
+            label_options.merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
           
           # build out the label element
-          label = label(field, options[:label].delete(:text), options.delete(:label))
+          label = label(field, label_options.delete(:text), label_options)
           
           # return the helper with a label if templates are not to be used
           return render_field_with_label(super, field, name, options) if self.class.ignore_templates
