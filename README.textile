@@ -60,7 +60,7 @@ The form assistant also provides a #cancel() helper that will allow the user to 
 
 # other options:
 <%= form.cancel 'Go Back' %>
-<%= form.cancel 'Nevermind', :url => some_path %>
+<%= form.cancel 'Nevermind', :path => some_path %>
 <%= form.cancel 'Go Back', :attrs => { :class => 'go-back' } %>
 </code></pre>
 

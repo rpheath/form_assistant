@@ -71,15 +71,14 @@ module RPH
       #
       # Other options inlude:
       #   <%= form.cancel 'Go Back' %>
-      #   <%= form.cancel 'Go Back', :url => some_path %>
+      #   <%= form.cancel 'Go Back', :path => some_path %>
       def cancel(*args)
-        options = {
-          :text => (args.first if args.first.is_a?(String)) || 'Cancel',
-          :path => (@template.request.env['HTTP_REFERER'] || @template.send("#{@object_name.to_s.pluralize}_path")),
-          :attrs => { :class => 'cancel' }
-        }.merge!(args.detect { |arg| arg.is_a?(Hash) } || {})
-
-        wrapper(:span, options.delete(:attrs), @template.link_to(options.delete(:text), options.delete(:path), options))
+        options = args.extract_options!
+        text    = options.delete(:text) || (args.first if args.first.is_a?(String)) || 'Cancel'
+        path    = options.delete(:path) || @template.request.env['HTTP_REFERER']    || @template.send("#{@object_name.to_s.pluralize}_path")
+        attrs   = { :class => 'cancel' }.merge!(options.delete(:attrs) || {})
+        
+        wrapper(:span, attrs, @template.link_to(text, path, options))
       end
 
       # This hook provides convenient way to wrap content with a div,
