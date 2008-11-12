@@ -2,6 +2,8 @@ h1. FormAssistant
 
 This is a Rails plugin that provides a custom form builder that attempts to make forms somewhat friendly.
 
+h2. Usage
+
 Once installed, use the form assistant just like #form_for():
 
 <pre><code><% form_assistant_for @project do |form| %>
@@ -12,11 +14,15 @@ Or if you'd rather use #form_for() everywhere, you can set the form assistant's 
 
 <pre><code>ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder</code></pre>
 
-The new and improved form assistant uses partials to format your fields, labels, and errors (if any). To get started, run...
+h2. Defaults and Configuration
 
-<pre><code>$> rake form_assistant:install</code></pre>
+Things you can customize...
 
-...from your project root. That will put some example form partials in app/views/forms/*.
+<pre><code># config/initializers/form_assistant.rb
+RPH::FormAssistant::FormBuilder.ignore_templates = true         # defaults to false
+RPH::FormAssistant::FormBuilder.include_inline_errors = false   # defaults to true
+RPH::FormAssistant::FormBuilder.template_root = '...'           # defaults to app/views/forms
+</code></pre>
 
 h2. Examples
 
@@ -29,18 +35,34 @@ I'm going to refer to a @form@ object in the examples. Assume this object is yie
 <% end %>
 </code></pre>
 
-Now, the examples:
+h3. Form Templates
+
+The new and improved form assistant uses partials to format your fields, labels, errors (if any), and tips. To get started, run...
+
+<pre><code>$> rake form_assistant:install</code></pre>
+
+...from your project root. That will put some example form partials in app/views/forms/*.
 
 By default, the form assistant will try to render a template based on the name of the helper. For instance, calling <pre><code><%= form.text_field :title %></code></pre> will look for a template called _text_field.html.erb located in app/views/forms. However, you can specify a different template easily:
 
 <pre><code><%= form.text_field :title, :template => 'custom_template' %></code></pre>
 
-If a specified template doesn't exist, a fallback template will be used. Also, if you'd like to take advantage of the form assistant (automatic labels, extensible helpers, and so on) but would rather not use templates for formatting, you can turn that off easily, by doing:
+If a specified template doesn't exist, a fallback template will be used (called '_field.html.erb').
 
-<pre><code># config/initializers/form_assistant.rb
-RPH::FormAssistant::FormBuilder.ignore_templates = true</code></pre>
+There's also a @#fieldset()@ helper available to you, although it doesn't belong to the form object (it's mixed into action view itself).
 
-Another convenient thing about the form assistant is the ability to control labels from their corresponding helper. For example...
+<pre><code><% fieldset 'User Registration' do %>
+  <%= form.text_field :name %>
+  <%= form.text_field :username %>
+  <%= form.text_field :password %>
+<% end %>
+</code></pre>
+
+The nice thing about that is it's also controlled by a template (cleverly called '_fieldset.html.erb').
+
+h3. Form Labels
+
+Another convenient thing about the form assistant is the ability to control labels from their respective helper. For example...
 
 <pre><code><%= form.text_field :title, :label => 'Project Title' %>
 <%= form.text_field :title, :label_text => 'Project Title' %>
@@ -51,7 +73,9 @@ Another convenient thing about the form assistant is the ability to control labe
 
 That works for all form helpers (text_area, check_box, etc). And by default, the label will be the humanized version of the field name, so that's what you'll get if you ignore the label options altogether.
 
-The form assistant also provides a #cancel() helper that will allow the user to go back to the previous screen, automatically.
+h3. Custom Helpers
+
+The form assistant provides a #cancel() helper that will allow the user to go back to the previous screen, automatically.
 
 <pre><code><%= form.cancel %>
 
@@ -78,6 +102,8 @@ I usually like to give my submit buttons special attention, and so does form ass
 <%= form.submission 'Save', :class => 'button' %>
 <%= form.submission 'Save', :attrs => { :class => 'submit-wrapper' } %>
 </code></pre>
+
+h3. Bonus Features
 
 Here are a few bonus features:
 
@@ -116,6 +142,10 @@ Now, an easier way to wrap a div around content:
 These helpers can be found in lib/form_assistant/helpers.rb. It was designed for extensibility, so please go crazy adding your own helpers! (see how easy it is by the existing implementations)
 
 Enjoy keeping your forms DRY.
+
+h2. Requirements
+
+The form assistant requires _at least_ Rails version 2.1.0. This is mainly due to the usage of the convenience methods now included in the Rails module (for things like @Rails.version@ and @Rails.root@).
 
 h2. Licensing
 
