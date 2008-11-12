@@ -4,6 +4,7 @@ module FormAssistantHelpers
   attr_accessor :render_options
   def render(options={})
     self.render_options = options
+    String.new
   end
 
   def locals
@@ -21,14 +22,18 @@ end
 
 describe "FormAssistant" do
   include FormAssistantHelpers
-  attr_reader :form
+  include RPH::FormAssistant::ActionView
+  
+  attr_accessor :form, :output_buffer
+  
   
   before(:each) do
+    @output_buffer = ''
     @address_book = OpenStruct.new
     @address_book.stub!(:errors).and_return(@errors ||= ActiveRecord::Errors.new(@address_book))
 
-    @form = RPH::FormAssistantFormBuilder.new(:address_book, @address_book, self, {}, nil)
-    RPH::FormAssistantFormBuilder.template_root = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'forms'))
+    @form = RPH::FormAssistant::FormBuilder.new(:address_book, @address_book, self, {}, nil)
+    RPH::FormAssistant::FormBuilder.template_root = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'forms'))
   end
   
   it "should use template based on input type" do
@@ -55,5 +60,12 @@ describe "FormAssistant" do
   it "should render a field with a tip" do
     form.text_field :nickname, :tip => 'What should we call you?'
      expect_locals :tip => 'What should we call you?' 
+  end
+  
+  it "should create fieldset" do
+    fieldset('Information') { "fields-go-here" }
+    expect_render :partial => 'forms/fieldset'
+    expect_locals :legend => 'Information',
+      :fields => 'fields-go-here'
   end
 end
