@@ -27,6 +27,7 @@ module RPH
       include RPH::FormAssistant::Helpers
       cattr_accessor :ignore_templates
       cattr_accessor :include_inline_errors
+      cattr_accessor :template_root
       
       # used if no other template is available
       attr_accessor_with_default :fallback_template, 'field'
@@ -38,6 +39,9 @@ module RPH
       
       # set to false if you'd rather use #error_messages_for()
       self.include_inline_errors = true
+
+      # sets the root directory where templates will be searched
+      self.template_root = File.join(Rails.root, '/app/views/forms')
       
       # override the field_error_proc so that it no longer wraps the field
       # with <div class="fieldWithErrors">...</div>, but just returns the field
@@ -59,7 +63,7 @@ module RPH
       # checks to make sure the template exists
       def template_exists?(template)
         partial = "_#{template}.html.erb"
-        File.exists?(File.join(Rails.root, '/app/views/forms', partial))
+        File.exists?(File.join(self.class.template_root, partial))
       end
       
     protected
@@ -96,7 +100,7 @@ module RPH
           
           # allows for a cleaner way of setting label text (since that's the more common need)
           # <%= form.text_field :whatever, :label => 'Whatever Title' %>
-          label_options.merge!(options[:label].is_a?(String) ? {:text => options[:label]} : options[:label])
+          label_options.merge!(options[:label].is_a?(String) ? {:text => options.delete(:label)} : options.delete(:label))
 
           # allow for a more convenient way to set common label options
           # <%= form.text_field :whatever, :label_id => 'dom_id' %>
@@ -108,17 +112,23 @@ module RPH
           end
           
           # build out the label element
-          label = label(field, label_options.delete(:text), label_options)
-          
-          # return the helper with a label if templates are not to be used
-          return render_field_with_label(super, field, name, options) if self.class.ignore_templates
-          
+          label = self.label(field, label_options.delete(:text), label_options)
+
           # grab the template
           template = options.delete(:template) || name.to_s
           template = self.fallback_template unless template_exists?(template)
+
+          # grab the tip, if any
+          tip = options.delete(:tip)
+          
+          # call the original render for the element
+          element = super(field, *(args << options))
+          
+          # return the helper with a label if templates are not to be used
+          return render_field_with_label(element, field, name, options) if self.class.ignore_templates
           
           # render the template from app/views/forms/
-          render_partial_for(super, field, label, options.delete(:tip), template, args)
+          render_partial_for(element, field, label, tip, template, args)
         end
       end
     end
