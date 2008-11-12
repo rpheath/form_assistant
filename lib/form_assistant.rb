@@ -41,13 +41,20 @@ module RPH
       self.include_inline_errors = true
 
       # sets the root directory where templates will be searched
-      self.template_root = File.join(Rails.root, '/app/views/forms')
+      # note: the template root will automatically be nested within 
+      # the configured view path (which defaults to app/views)
+      self.template_root = File.join(Rails.configuration.view_path, 'forms')
       
       # override the field_error_proc so that it no longer wraps the field
       # with <div class="fieldWithErrors">...</div>, but just returns the field
       ActionView::Base.field_error_proc = Proc.new { |html_tag, instance| html_tag }
       
     private
+      # render(:partial => '...') doesn't want the full path of the template
+      def self.template_root(full_path = false)
+        full_path ? @@template_root : @@template_root.gsub(Rails.configuration.view_path + '/', '')
+      end
+      
       # get the error messages (if any) for a field
       def error_message_for(field)
         return nil unless has_errors?(field)
@@ -63,7 +70,7 @@ module RPH
       # checks to make sure the template exists
       def template_exists?(template)
         partial = "_#{template}.html.erb"
-        File.exists?(File.join(self.class.template_root, partial))
+        File.exists?(File.join(self.class.template_root(true), partial))
       end
       
     protected
@@ -72,13 +79,13 @@ module RPH
       def render_partial_for(element, field, label, tip, template, args)
         errors = self.class.include_inline_errors ? error_message_for(field) : nil
         locals = { :element => element, :label => label, :errors => errors, :tip => tip }
-        
-        # render the appropriate partial from app/views/forms/
-        @template.render :partial => "forms/#{template}", :locals => locals
+
+        # render the appropriate partial from the configured template root
+        @template.render :partial => "#{self.class.template_root}/#{template}", :locals => locals
       end
       
-      # render the field with the label (does not use the templates)
-      def render_field_with_label(element, field, name, options)
+      # render the element with the label (does not use the templates)
+      def render_element_with_label(element, field, name, options)
         # consider trailing labels
         if %w(check_box radio_button).include?(name)
           label_options = options.delete(:label)
@@ -125,7 +132,7 @@ module RPH
           element = super(field, *(args << options))
           
           # return the helper with a label if templates are not to be used
-          return render_field_with_label(element, field, name, options) if self.class.ignore_templates
+          return render_element_with_label(element, field, name, options) if self.class.ignore_templates
           
           # render the template from app/views/forms/
           render_partial_for(element, field, label, tip, template, args)
@@ -169,7 +176,7 @@ module RPH
         # <% end %>
         def fieldset(legend, &block)
           locals = { :legend => legend, :fields => capture(&block) }
-          partial = render(:partial => 'forms/fieldset', :locals => locals)
+          partial = render(:partial => "#{RPH::FormAssistant::FormBuilder.template_root}/fieldset", :locals => locals)
           
           # render the fields
           binding_required ? concat(partial, block.binding) : concat(partial)
