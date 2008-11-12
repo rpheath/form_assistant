@@ -19,10 +19,13 @@ h2. Defaults and Configuration
 Things you can customize...
 
 <pre><code># config/initializers/form_assistant.rb
+  
 RPH::FormAssistant::FormBuilder.ignore_templates = true         # defaults to false
 RPH::FormAssistant::FormBuilder.include_inline_errors = false   # defaults to true
 RPH::FormAssistant::FormBuilder.template_root = '...'           # defaults to app/views/forms
 </code></pre>
+
+The only thing worth mentioning deals with ignoring templates. If you ignore the templates, you will still get access to all of the custom helpers and your form helpers (@text_field@, @text_area@, etc) will automatically have labels attached to them. The form assistant considers trailing labels, too, meaning if you have a @check_box@ the label will be _after_ the check box instead of before it. It will also be given a CSS class of 'inline'.
 
 h2. Examples
 
