@@ -38,10 +38,12 @@ I'm going to refer to a @form@ object in the examples. Assume this object is yie
 <% end %>
 </code></pre>
 
-And just to be clear, there's also a @fields_assistant_for()@ helper that takes the place of @fields_for()@.
+And just to be clear, the regular @fields_for()@ doesn't inherit the builder from the builder object, but as long as you're using the form assistant, this problem has been taken care of automatically. Just call the @fields_for()@ helper on the builder object, like so:
 
-<pre><code><% fields_assistant_for :tasks do |task_fields| %>
-  <%= task_fields.text_field :name %>
+<pre><code><% form_assistant_for @project do |form| %>
+  <% form.fields_for :tasks do |task_fields| %>
+    <%= task_fields.text_field :name %>
+  <% end %>
 <% end %>
 </code></pre>
 

@@ -138,6 +138,26 @@ module RPH
           render_partial_for(element, field, label, tip, template, args)
         end
       end
+      
+      # since fields_for() doesn't inherit the builder from form_for, we need
+      # to provide a means to set the builder automatically
+      #
+      # usage: simply call fields_for() on the builder object
+      #
+      #   <% form_assistant_for @project do |form| %>
+      #     <%= form.text_field :title %>
+      #     <% form.fields_for :tasks do |task_fields| %>
+      #       <%= task_fields.text_field :name %>
+      #     <% end %>
+      #   <% end %>
+      def fields_for_with_form_assistant(record_or_name_or_array, *args, &proc)
+        options = args.extract_options!
+        # hand control over to the regular fields_for()
+        fields_for_without_form_assistant(record_or_name_or_array, *(args << options.merge!(:builder => self.class)), &proc)
+      end
+      
+      # used to intercept fields_for() and set the builder
+      alias_method_chain :fields_for, :form_assistant
     end
     
     # methods that mix into ActionView::Base
@@ -163,15 +183,6 @@ module RPH
         end
       
       public
-        # ----------------------------------------------------------------------------
-        # Note: 
-        #   form_assistant_for() and fields_assistant_for() are only useful
-        #   if you DO NOT have your default builder set. You can set it like so:
-        #
-        #   # config/initializers/form_assistant.rb
-        #   ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder
-        # ----------------------------------------------------------------------------
-        #
         # easy way to make use of FormAssistant::FormBuilder
         #
         # <% form_assistant_for @project do |form| %>
@@ -181,18 +192,7 @@ module RPH
           form_for_with_builder(record_or_name_or_array, RPH::FormAssistant::FormBuilder, *args, &proc)
         end
         
-        # since fields_for() doesn't inherit the builder, we need a
-        # convenience method for using FormAssistant::FormBuilder
-        #
-        # <% fields_assistant_for :tasks do |tasks_form| %>
-        #   // fancy fields stuff
-        # <% end %>
-        def fields_assistant_for(record_or_name_or_array, *args, &proc)
-          fields_for_with_builder(record_or_name_or_array, RPH::FormAssistant::FormBuilder, *args, &proc)
-        end
-        
-        # handles fieldsets
-        # (borrow the #fieldset() from Chris Scharf: 
+        # (borrowed the #fieldset() helper from Chris Scharf: 
         #   http://github.com/scharfie/slate/tree/master/app/helpers/application_helper.rb)
         #
         # <% fieldset 'User Registration' do %>
