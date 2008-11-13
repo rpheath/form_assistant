@@ -170,13 +170,6 @@ module RPH
           form_for(record_or_name_or_array, *(args << options.merge!(:builder => builder)), &proc)
         end
         
-        # used to ensure that the desired builder gets set before calling fields_for()
-        def fields_for_with_builder(record_or_name_or_array, builder, *args, &proc)
-          options = args.extract_options!
-          # hand control over to the regular fields_for()
-          fields_for(record_or_name_or_array, *(args << options.merge!(:builder => builder)), &proc)
-        end
-        
         # determines if binding is needed for #concat()
         def binding_required
           RPH::FormAssistant::Rules.binding_required?
