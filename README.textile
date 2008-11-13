@@ -21,6 +21,7 @@ Things you can customize...
 <pre><code># config/initializers/form_assistant.rb
   
 RPH::FormAssistant::FormBuilder.ignore_templates = true         # defaults to false
+RPH::FormAssistant::FormBuilder.ignore_labels = true            # defaults to false
 RPH::FormAssistant::FormBuilder.include_inline_errors = false   # defaults to true
 RPH::FormAssistant::FormBuilder.template_root = '...'           # defaults to app/views/forms
 </code></pre>

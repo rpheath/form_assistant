@@ -26,6 +26,7 @@ module RPH
     class FormBuilder < ActionView::Helpers::FormBuilder
       include RPH::FormAssistant::Helpers
       cattr_accessor :ignore_templates
+      cattr_accessor :ignore_labels
       cattr_accessor :include_inline_errors
       cattr_accessor :template_root
       
@@ -36,6 +37,10 @@ module RPH
       # be used; however, labels will still be automatically attached
       # and all FormAssistant helpers are still avaialable
       self.ignore_templates = false
+      
+      # if set to true, labels will become nil everywhere (both 
+      # with and without templates)
+      self.ignore_labels = false
       
       # set to false if you'd rather use #error_messages_for()
       self.include_inline_errors = true
@@ -88,6 +93,8 @@ module RPH
       def render_element(element, field, name, options, ignore_label = false)
         return element if ignore_label
         
+        # need to consider if the shortcut label option was used
+        # i.e. <%= form.text_field :title, :label => 'Project Title' %>
         text, label_options = if options[:label].is_a?(String)
           [options[:label], {}]
         else
@@ -110,11 +117,14 @@ module RPH
         define_method name do |field, *args|
           options, label_options = args.extract_options!, {}
           
+          # consider the global setting first
+          options[:label] = false if self.class.ignore_labels
+          
           # allow for turning labels off on a per-helper basis
           # <%= form.text_field :title, :label => false %>
           ignore_label = !!(options[:label].kind_of?(FalseClass))
           
-          # ensure that the :label option is always a Hash from this point on
+          # ensure that the :label option is a Hash from this point on
           options[:label] ||= {}
           
           # allow for a cleaner way of setting label text
