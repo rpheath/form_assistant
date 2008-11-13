@@ -27,7 +27,7 @@ module RPH
       include RPH::FormAssistant::Helpers
       cattr_accessor :ignore_templates
       cattr_accessor :ignore_labels
-      cattr_accessor :include_inline_errors
+      cattr_accessor :ignore_errors
       cattr_accessor :template_root
       
       # used if no other template is available
@@ -42,8 +42,8 @@ module RPH
       # with and without templates)
       self.ignore_labels = false
       
-      # set to false if you'd rather use #error_messages_for()
-      self.include_inline_errors = true
+      # set to true if you'd rather use #error_messages_for()
+      self.ignore_errors = false
 
       # sets the root directory where templates will be searched
       # note: the template root will automatically be nested within 
@@ -82,7 +82,7 @@ module RPH
       # render the appropriate partial based on whether or not
       # the field has any errors
       def render_partial_for(element, field, label, tip, template, args)
-        errors = self.class.include_inline_errors ? error_message_for(field) : nil
+        errors = self.class.ignore_errors ? nil : error_message_for(field)
         locals = { :element => element, :label => label, :errors => errors, :tip => tip }
 
         # render the appropriate partial from the configured template root
