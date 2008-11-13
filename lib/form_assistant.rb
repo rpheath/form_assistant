@@ -145,11 +145,10 @@ module RPH
       private
         # used to ensure that the desired builder gets set before calling form_for()
         def form_for_with_builder(record_or_name_or_array, builder, *args, &proc)
-          options = (args.detect { |arg| arg.is_a?(Hash) } || {}).merge! :builder => builder
-          args << options
+          options = args.extract_options!
           
           # hand control over to the regular form_for()
-          form_for(record_or_name_or_array, *args, &proc)
+          form_for(record_or_name_or_array, *(args << options.merge!(:builder => builder)), &proc)
         end
         
         # determines if binding is needed for #concat()
