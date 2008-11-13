@@ -7,10 +7,11 @@ module RPH
   # The idea is to make forms extremely less painful and a lot more DRY
   module FormAssistant
     # FormAssistant::FormBuilder
-    #   * provides several convenient helpers (see helpers.rb)
+    #   * provides several convenient helpers (see helpers.rb) and
+    #     an infrastructure to easily add your own
     #   * method_missing hook to wrap content "on the fly"
-    #   * labels automatically attached to field helpers
-    #   * format fields using partials (extremely extensible)
+    #   * optional: automatically attach labels to field helpers
+    #   * optional: format fields using partials (extremely extensible)
     # 
     # Usage:
     #
@@ -23,6 +24,11 @@ module RPH
     #   <% form_assistant_for @project do |form| %>
     #     // fancy form stuff
     #   <% end %>
+    #
+    #   - or -
+    #
+    #   # in config/intializers/form_assistant.rb
+    #   ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder
     class FormBuilder < ActionView::Helpers::FormBuilder
       include RPH::FormAssistant::Helpers
       cattr_accessor :ignore_templates
@@ -33,8 +39,8 @@ module RPH
       # used if no other template is available
       attr_accessor_with_default :fallback_template, 'field'
       
-      # if set to true, none of the templates in app/views/forms/ will
-      # be used; however, labels will still be automatically attached
+      # if set to true, none of the templates will be used;
+      # however, labels can still be automatically attached
       # and all FormAssistant helpers are still avaialable
       self.ignore_templates = false
       
@@ -46,8 +52,8 @@ module RPH
       self.ignore_errors = false
 
       # sets the root directory where templates will be searched
-      # note: the template root will automatically be nested within 
-      # the configured view path (which defaults to app/views)
+      # note: the template root should be nested within the
+      # configured view path (which defaults to app/views)
       self.template_root = File.join(Rails.configuration.view_path, 'forms')
       
       # override the field_error_proc so that it no longer wraps the field
@@ -67,25 +73,22 @@ module RPH
         [field.to_s.humanize, (errors.is_a?(Array) ? errors.to_sentence : errors).to_s].join(' ')
       end
       
-      # returns true if a field is invalid or the object is missing
+      # returns true if a field is invalid
       def has_errors?(field)
         !(object.nil? || object.errors[field].blank?)
       end
       
       # checks to make sure the template exists
       def template_exists?(template)
-        partial = "_#{template}.html.erb"
-        File.exists?(File.join(self.class.template_root(true), partial))
+        File.exists?(File.join(self.class.template_root(true), "_#{template}.html.erb"))
       end
       
     protected
-      # render the appropriate partial based on whether or not
-      # the field has any errors
+      # renders the appropriate partial located in the template root
       def render_partial_for(element, field, label, tip, template, args)
         errors = self.class.ignore_errors ? nil : error_message_for(field)
         locals = { :element => element, :label => label, :errors => errors, :tip => tip }
 
-        # render the appropriate partial from the configured template root
         @template.render :partial => "#{self.class.template_root}/#{template}", :locals => locals
       end
       
@@ -117,7 +120,7 @@ module RPH
         define_method name do |field, *args|
           options, label_options = args.extract_options!, {}
           
-          # consider the global setting first
+          # consider the global setting for labels first
           options[:label] = false if self.class.ignore_labels
           
           # allow for turning labels off on a per-helper basis
@@ -161,10 +164,10 @@ module RPH
         end
       end
       
-      # since fields_for() doesn't inherit the builder from form_for, we need
-      # to provide a means to set the builder automatically
+      # since #fields_for() doesn't inherit the builder from form_for, we need
+      # to provide a means to set the builder automatically (works with nesting, too)
       #
-      # usage: simply call fields_for() on the builder object
+      # Usage: simply call #fields_for() on the builder object
       #
       #   <% form_assistant_for @project do |form| %>
       #     <%= form.text_field :title %>
@@ -174,25 +177,26 @@ module RPH
       #   <% end %>
       def fields_for_with_form_assistant(record_or_name_or_array, *args, &proc)
         options = args.extract_options!
-        # hand control over to the regular fields_for()
+        # hand control over to the original #fields_for()
         fields_for_without_form_assistant(record_or_name_or_array, *(args << options.merge!(:builder => self.class)), &proc)
       end
       
-      # used to intercept fields_for() and set the builder
+      # used to intercept #fields_for() and set the builder
       alias_method_chain :fields_for, :form_assistant
     end
     
     # methods that mix into ActionView::Base
     module ActionView
       private
-        # used to ensure that the desired builder gets set before calling form_for()
+        # used to ensure that the desired builder gets set before calling #form_for()
         def form_for_with_builder(record_or_name_or_array, builder, *args, &proc)
           options = args.extract_options!
-          # hand control over to the regular form_for()
+          # hand control over to the original #form_for()
           form_for(record_or_name_or_array, *(args << options.merge!(:builder => builder)), &proc)
         end
         
         # determines if binding is needed for #concat()
+        # (Rails 2.2.0 and greater no longer requires the binding)
         def binding_required
           RPH::FormAssistant::Rules.binding_required?
         end
