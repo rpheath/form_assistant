@@ -38,6 +38,13 @@ I'm going to refer to a @form@ object in the examples. Assume this object is yie
 <% end %>
 </code></pre>
 
+And just to be clear, there's also a @fields_assistant_for()@ helper that takes the place of @fields_for()@.
+
+<pre><code><% fields_assistant_for :tasks do |task_fields| %>
+  <%= task_fields.text_field :name %>
+<% end %>
+</code></pre>
+
 h3. Form Templates
 
 The new and improved form assistant uses partials to format your fields, labels, errors (if any), and tips. To get started, run...

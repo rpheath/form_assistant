@@ -146,9 +146,15 @@ module RPH
         # used to ensure that the desired builder gets set before calling form_for()
         def form_for_with_builder(record_or_name_or_array, builder, *args, &proc)
           options = args.extract_options!
-          
           # hand control over to the regular form_for()
           form_for(record_or_name_or_array, *(args << options.merge!(:builder => builder)), &proc)
+        end
+        
+        # used to ensure that the desired builder gets set before calling fields_for()
+        def fields_for_with_builder(record_or_name_or_array, builder, *args, &proc)
+          options = args.extract_options!
+          # hand control over to the regular fields_for()
+          fields_for(record_or_name_or_array, *(args << options.merge!(:builder => builder)), &proc)
         end
         
         # determines if binding is needed for #concat()
@@ -157,6 +163,15 @@ module RPH
         end
       
       public
+        # ----------------------------------------------------------------------------
+        # Note: 
+        #   form_assistant_for() and fields_assistant_for() are only useful
+        #   if you DO NOT have your default builder set. You can set it like so:
+        #
+        #   # config/initializers/form_assistant.rb
+        #   ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder
+        # ----------------------------------------------------------------------------
+        #
         # easy way to make use of FormAssistant::FormBuilder
         #
         # <% form_assistant_for @project do |form| %>
@@ -164,6 +179,16 @@ module RPH
         # <% end %>
         def form_assistant_for(record_or_name_or_array, *args, &proc)
           form_for_with_builder(record_or_name_or_array, RPH::FormAssistant::FormBuilder, *args, &proc)
+        end
+        
+        # since fields_for() doesn't inherit the builder, we need a
+        # convenience method for using FormAssistant::FormBuilder
+        #
+        # <% fields_assistant_for :tasks do |tasks_form| %>
+        #   // fancy fields stuff
+        # <% end %>
+        def fields_assistant_for(record_or_name_or_array, *args, &proc)
+          fields_for_with_builder(record_or_name_or_array, RPH::FormAssistant::FormBuilder, *args, &proc)
         end
         
         # handles fieldsets
