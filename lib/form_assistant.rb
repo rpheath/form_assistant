@@ -84,15 +84,22 @@ module RPH
         @template.render :partial => "#{self.class.template_root}/#{template}", :locals => locals
       end
       
-      # render the element with the label (does not use the templates)
-      def render_element_with_label(element, field, name, options)
+      # render the element with an optional label (does not use the templates)
+      def render_element(element, field, name, options, ignore_label = false)
+        return element if ignore_label
+        
+        text, label_options = if options[:label].is_a?(String)
+          [options[:label], {}]
+        else
+          [options[:label].delete(:text), options.delete(:label)]
+        end
+        
         # consider trailing labels
         if %w(check_box radio_button).include?(name)
-          label_options = options.delete(:label)
           label_options[:class] = (label_options[:class].to_s + ' inline').strip
-          element + label(field, label_options.delete(:text), label_options)
+          element + label(field, text, label_options)
         else
-          label(field, options[:label].delete(:text), options.delete(:label)) + element
+          label(field, text, label_options) + element
         end
       end
     
@@ -101,13 +108,18 @@ module RPH
       # behave the way FormAssistant thinks they should behave
       send(:form_helpers).each do |name|
         define_method name do |field, *args|
-          # pull out the options
           options, label_options = args.extract_options!, {}
+          
+          # allow for turning labels off on a per-helper basis
+          # <%= form.text_field :title, :label => false %>
+          ignore_label = !!(options[:label].kind_of?(FalseClass))
+          
+          # ensure that the :label option is always a Hash from this point on
           options[:label] ||= {}
           
-          # allows for a cleaner way of setting label text (since that's the more common need)
+          # allow for a cleaner way of setting label text
           # <%= form.text_field :whatever, :label => 'Whatever Title' %>
-          label_options.merge!(options[:label].is_a?(String) ? {:text => options.delete(:label)} : options.delete(:label))
+          label_options.merge!(options[:label].is_a?(String) ? {:text => options[:label]} : options[:label])
 
           # allow for a more convenient way to set common label options
           # <%= form.text_field :whatever, :label_id => 'dom_id' %>
@@ -118,8 +130,8 @@ module RPH
             label_options.merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
           
-          # build out the label element
-          label = self.label(field, label_options.delete(:text), label_options)
+          # build out the label element (if desired)
+          label = ignore_label ? nil : self.label(field, label_options.delete(:text), label_options)
 
           # grab the template
           template = options.delete(:template) || name.to_s
@@ -131,10 +143,10 @@ module RPH
           # call the original render for the element
           element = super(field, *(args << options))
           
-          # return the helper with a label if templates are not to be used
-          return render_element_with_label(element, field, name, options) if self.class.ignore_templates
+          # return the helper with an optional label if templates are not to be used
+          return render_element(element, field, name, options, ignore_label) if self.class.ignore_templates
           
-          # render the template from app/views/forms/
+          # render the partial template from the desired template root
           render_partial_for(element, field, label, tip, template, args)
         end
       end
