@@ -166,6 +166,7 @@ module RPH
       
       # Renders a partial, passing the form object as a local
       # variable named 'form'
+      # <%= form.partial 'shared/new', :locals => { :whatever => @whatever } %>
       def partial(name, options={})
         (options[:locals] ||= {}).update :form => self
         options.update :partial => name

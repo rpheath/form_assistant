@@ -117,6 +117,12 @@ I usually like to give my submit buttons special attention, and so does form ass
 <%= form.submission 'Save', :attrs => { :class => 'submit-wrapper' } %>
 </code></pre>
 
+There's also a @#partial()@ helper:
+
+<pre><code><%= form.partial 'shared/new', :locals => { ... } %></code></pre>
+
+The builder variable will be automatically passed as a local called 'form'.
+
 h3. Bonus Features
 
 Here are a few bonus features:
