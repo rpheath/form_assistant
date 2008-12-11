@@ -73,6 +73,14 @@ There's also a @#fieldset()@ helper available to you, although it doesn't belong
 
 The nice thing about that is it's also controlled by a template (cleverly called '_fieldset.html.erb').
 
+h3. Required Fields
+
+You can now pass a @:required@ flag to the field helpers, and it will be available within the templates.
+
+<pre><code><%= form.text_field :title, :required => true %></code></pre>
+
+Then you can check the 'required' local variable and handle it accordingly. Naturally, this defaults to false.
+
 h3. Form Labels
 
 Another convenient thing about the form assistant is the ability to control labels from their respective helper. For example...

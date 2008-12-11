@@ -85,9 +85,9 @@ module RPH
       
     protected
       # renders the appropriate partial located in the template root
-      def render_partial_for(element, field, label, tip, template, helper, args)
+      def render_partial_for(element, field, label, tip, template, helper, required, args)
         errors = self.class.ignore_errors ? nil : error_message_for(field)
-        locals = { :element => element, :label => label, :errors => errors, :tip => tip, :helper => helper }
+        locals = { :element => element, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required }
 
         @template.render :partial => "#{self.class.template_root}/#{template}", :locals => locals
       end
@@ -153,6 +153,9 @@ module RPH
           # grab the tip, if any
           tip = options.delete(:tip)
           
+          # is the field required?
+          required = !!options.delete(:required)
+          
           # call the original render for the element
           element = super(field, *(args << options))
           
@@ -160,7 +163,7 @@ module RPH
           return render_element(element, field, name, options, ignore_label) if self.class.ignore_templates
           
           # render the partial template from the desired template root
-          render_partial_for(element, field, label, tip, template, name, args)
+          render_partial_for(element, field, label, tip, template, name, required, args)
         end
       end
       
