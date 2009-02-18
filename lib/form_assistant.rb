@@ -99,7 +99,7 @@ module RPH
         # need to consider if the shortcut label option was used
         # i.e. <%= form.text_field :title, :label => 'Project Title' %>
         text, label_options = if options[:label].is_a?(String)
-          [options[:label], {}]
+          [options.delete(:label), {}]
         else
           [options[:label].delete(:text), options.delete(:label)]
         end
@@ -146,6 +146,9 @@ module RPH
           # build out the label element (if desired)
           label = ignore_label ? nil : self.label(field, label_options.delete(:text), label_options)
 
+          should_render_with_template = true
+          should_render_with_template = false if options.has_key?(:template) && options[:template].blank?
+          
           # grab the template
           template = options.delete(:template) || name.to_s
           template = self.fallback_template unless template_exists?(template)
@@ -156,8 +159,13 @@ module RPH
           # is the field required?
           required = !!options.delete(:required)
           
+          # ensure that we don't have any custom options pass through
+          field_options = options.except(:label, :template, :tip, :required)
+          
           # call the original render for the element
-          element = super(field, *(args << options))
+          element = super(field, *(args << field_options))
+          
+          return element unless should_render_with_template
           
           # return the helper with an optional label if templates are not to be used
           return render_element(element, field, name, options, ignore_label) if self.class.ignore_templates
