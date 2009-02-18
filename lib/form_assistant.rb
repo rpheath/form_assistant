@@ -147,7 +147,7 @@ module RPH
           label = ignore_label ? nil : self.label(field, label_options.delete(:text), label_options)
 
           should_render_with_template = true
-          should_render_with_template = false if options.has_key?(:template) && options[:template].blank?
+          should_render_with_template = false if options.has_key?(:template) && options[:template].kind_of?(FalseClass)
           
           # grab the template
           template = options.delete(:template) || name.to_s
