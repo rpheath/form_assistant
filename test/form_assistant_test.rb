@@ -32,7 +32,14 @@ module FormAssistantHelpers
   def template_path(name)
     File.join(template_root, name)
   end
+end
+
+class AddressBook < ActiveRecord::Base
+  attr_accessor *%w(first_name nickname)
   
+  def self.columns
+    Hash.new
+  end
 end
 
 class FormAssistantTest < ActionView::TestCase
@@ -41,8 +48,9 @@ class FormAssistantTest < ActionView::TestCase
   attr_accessor :form
 
   def setup
-    @address_book = OpenStruct.new
-    @address_book.stubs(:errors).returns(@errors ||= ActiveRecord::Errors.new(@address_book))
+    @address_book = AddressBook.new
+    # @address_book = OpenStruct.new
+    # @address_book.stubs(:errors).returns(@errors ||= ActiveRecord::Errors.new(@address_book))
     @form = RPH::FormAssistant::FormBuilder.new(:address_book, @address_book, self, {}, nil)
     RPH::FormAssistant::FormBuilder.template_root = File.expand_path(File.join(File.dirname(__FILE__), '../forms'))
   end
@@ -65,7 +73,7 @@ class FormAssistantTest < ActionView::TestCase
   test "should render an invalid field" do
     @address_book.errors.add(:first_name, 'cannot be root')
     form.text_field :first_name
-    expect_locals :errors => 'First name cannot be root'
+    expect_locals :errors => ['First name cannot be root']
   end
   
   test "should render a field with a tip" do

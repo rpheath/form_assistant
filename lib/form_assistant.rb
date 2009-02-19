@@ -70,7 +70,21 @@ module RPH
       def error_message_for(field)
         return nil unless has_errors?(field)
         errors = object.errors[field]
-        [field.to_s.humanize, (errors.is_a?(Array) ? errors.to_sentence : errors).to_s].join(' ')
+        full_messages_for(field)
+        # [field.to_s.humanize, (errors.is_a?(Array) ? errors.to_sentence : errors).to_s].join(' ')
+      end
+      
+      # Returns full error messages for given field (uses I18n)
+      def full_messages_for(field)
+        full_messages = []
+        attr_name     = object.class.human_attribute_name(field.to_s)
+
+        object.errors[field].each do |message|
+          next unless message
+          full_messages << attr_name + I18n.t('activerecord.errors.format.separator', :default => ' ') + message
+        end
+        
+        full_messages
       end
       
       # returns true if a field is invalid
@@ -142,6 +156,10 @@ module RPH
             label_option = "label_#{option}".to_sym
             label_options.merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
+          
+          # Ensure we have default label text 
+          # (since Rails' label() does not currently respect I18n)
+          label_options[:text] ||= object.class.human_attribute_name(field.to_s)
           
           # build out the label element (if desired)
           label = ignore_label ? nil : self.label(field, label_options.delete(:text), label_options)
