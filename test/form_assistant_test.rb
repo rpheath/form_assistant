@@ -30,7 +30,7 @@ module FormAssistantHelpers
   end
   
   def template_path(name)
-    File.join(template_root, name)
+    File.join(template_root, name) + '.html.erb'
   end
 end
 

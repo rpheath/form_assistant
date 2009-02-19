@@ -103,7 +103,7 @@ module RPH
         errors = self.class.ignore_errors ? nil : error_message_for(field)
         locals = { :element => element, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required }
 
-        @template.render :partial => "#{self.class.template_root}/#{template}", :locals => locals
+        @template.render :partial => "#{self.class.template_root}/#{template}.html.erb", :locals => locals
       end
       
       # render the element with an optional label (does not use the templates)
@@ -257,7 +257,7 @@ module RPH
         # <% end %>
         def fieldset(legend, &block)
           locals = { :legend => legend, :fields => capture(&block) }
-          partial = render(:partial => "#{RPH::FormAssistant::FormBuilder.template_root}/fieldset", :locals => locals)
+          partial = render(:partial => "#{RPH::FormAssistant::FormBuilder.template_root}/fieldset.html.erb", :locals => locals)
           
           # render the fields
           binding_required ? concat(partial, block.binding) : concat(partial)
