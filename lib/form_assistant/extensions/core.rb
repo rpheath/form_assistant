@@ -5,8 +5,9 @@
 #       <%= errors.to_list %>
 #       <%= errors.to_list(:class => 'errorz') %>
 class Array
-  def to_s(new_lines = false)
-    new_lines ? self.join("\n") : self.to_sentence
+  def to_s(options = {})
+    return self.join('<br />') if options[:break]
+    self.to_sentence
   end
   
   # converts an array into an unordered list
