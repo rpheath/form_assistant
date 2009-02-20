@@ -100,7 +100,7 @@ module RPH
       # renders the appropriate partial located in the template root
       def render_partial_for(element, field, label, tip, template, helper, required, args)
         errors = self.class.ignore_errors ? nil : error_message_for(field)
-        locals = { :element => element, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required }
+        locals = { :element => element, :label => label, :errors => Errors.new(errors), :tip => tip, :helper => helper, :required => required }
 
         @template.render :partial => "#{self.class.template_root}/#{template}.html.erb", :locals => locals
       end
@@ -220,6 +220,27 @@ module RPH
       
       # used to intercept #fields_for() and set the builder
       alias_method_chain :fields_for, :form_assistant
+    end
+    
+    # used to assist with error formatting in view partials
+    class Errors < Array
+      def initialize(errors)
+        @errors = errors || []
+      end
+      
+      def to_s(new_lines = false)
+        new_lines ? @errors.join("\n") : @errors.to_sentence
+      end
+      
+      def to_list(options = {})
+        css_class = options.delete(:class) || 'errors'
+        
+        list_items = @errors.inject("") do |items, error|
+          items << "<li>#{error}</li>"
+        end
+        
+        return "<ul class='#{css_class}'>#{list_items}</ul>"
+      end
     end
     
     # methods that mix into ActionView::Base
