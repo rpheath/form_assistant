@@ -1,7 +1,7 @@
 # extensions for formatting error messages
 #
 #   Ex: <%= errors %>
-#       <%= errors.to_s(true) %>
+#       <%= errors.to_s(:break => true) %>
 #       <%= errors.to_list %>
 #       <%= errors.to_list(:class => 'errorz') %>
 class Array
