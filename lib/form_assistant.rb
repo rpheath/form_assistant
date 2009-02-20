@@ -78,15 +78,12 @@ module RPH
       
       # Returns full error messages for given field (uses I18n)
       def full_messages_for(field)
-        full_messages = []
-        attr_name     = object.class.human_attribute_name(field.to_s)
+        attr_name = object.class.human_attribute_name(field.to_s)
 
-        object.errors[field].each do |message|
+        object.errors[field].inject([]) do |full_messages, message|
           next unless message
           full_messages << attr_name + I18n.t('activerecord.errors.format.separator', :default => ' ') + message
         end
-        
-        full_messages
       end
       
       # returns true if a field is invalid
