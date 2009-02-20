@@ -70,8 +70,10 @@ module RPH
       def error_message_for(field)
         return nil unless has_errors?(field)
         errors = object.errors[field]
-        full_messages_for(field)
-        # [field.to_s.humanize, (errors.is_a?(Array) ? errors.to_sentence : errors).to_s].join(' ')
+        
+        RPH::FormAssistant::Rules.has_I18n_support? ? 
+          full_messages_for(field) :
+            [field.to_s.humanize, (errors.is_a?(Array) ? errors.to_sentence : errors).to_s].join(' ')
       end
       
       # Returns full error messages for given field (uses I18n)

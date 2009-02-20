@@ -8,6 +8,10 @@ module RPH
         def self.binding_required?
           !!( Rails.version < '2.2.0' )
         end
+        
+        def self.has_I18n_support?
+          !!( Rails.version > '2.2.0' )
+        end
       end
   end
 end
