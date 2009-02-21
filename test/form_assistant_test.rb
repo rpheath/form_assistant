@@ -1,4 +1,4 @@
-require 'test_helper' # File.join(File.dirname(__FILE__), '../test_helper')
+require 'test_helper'
 
 module FormAssistantHelpers
   attr_accessor :render_options
@@ -74,6 +74,7 @@ class FormAssistantTest < ActionView::TestCase
     @address_book.errors.add(:first_name, 'cannot be root')
     form.text_field :first_name
     expect_locals :errors => ['First name cannot be root']
+    assert_kind_of RPH::FormAssistant::FieldErrors, locals[:errors]
   end
   
   test "should render a field with a tip" do
@@ -91,5 +92,31 @@ class FormAssistantTest < ActionView::TestCase
     expect_render :partial => template_path('fieldset')
     expect_locals :legend => 'Information',
       :fields => 'fields-go-here'
+  end
+  
+  test "should support I18n if available" do
+    if Object.const_defined?(:I18n)
+      I18n.backend = I18n::Backend::Simple.new
+      I18n.backend.store_translations 'en', :activerecord => {
+        :attributes => { 
+          :address_book => {
+            :first_name => 'Given name'
+          } 
+        } 
+      }
+      
+      @address_book.errors.add(:first_name, 'cannot be root')
+      @address_book.errors.add(:first_name, 'cannot be admin')
+      form.text_field :first_name
+      expect_locals :errors => ['Given name cannot be root', 'Given name cannot be admin']
+    end
+  end
+  
+  test "should massage error messages when I18n isn't not available" do
+    RPH::FormAssistant::Rules.expects(:has_I18n_support?).returns(false)
+    @address_book.errors.add(:first_name, 'cannot be root')
+    @address_book.errors.add(:first_name, 'cannot be admin')
+    form.text_field :first_name
+    expect_locals :errors => ['First name cannot be root and cannot be admin']
   end
 end
