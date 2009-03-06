@@ -130,23 +130,18 @@ module RPH
         end
       end
     
-    public
-      # redefining all traditional form helpers so that they
-      # behave the way FormAssistant thinks they should behave
-      send(:form_helpers).each do |name|
-        define_method name do |field, *args|
-          options, label_options = args.extract_options!, {}
-          
-          # consider the global setting for labels first
-          options[:label] = false if self.class.ignore_labels
-          
-          # allow for turning labels off on a per-helper basis
-          # <%= form.text_field :title, :label => false %>
-          ignore_label = !!(options[:label].kind_of?(FalseClass))
-          
+      def extract_options_for_label(field, options={})
+        label_options = {}
+
+        # consider the global setting for labels and
+        # allow for turning labels off on a per-helper basis
+        # <%= form.text_field :title, :label => false %>
+        if self.class.ignore_labels || options[:label] === false
+          label_options[:label] = false
+        else  
           # ensure that the :label option is a Hash from this point on
           options[:label] ||= {}
-          
+        
           # allow for a cleaner way of setting label text
           # <%= form.text_field :whatever, :label => 'Whatever Title' %>
           label_options.merge!(options[:label].is_a?(String) ? {:text => options[:label]} : options[:label])
@@ -159,20 +154,67 @@ module RPH
             label_option = "label_#{option}".to_sym
             label_options.merge!(option.to_sym => options.delete(label_option)) if options[label_option]
           end
-          
+        
           # Ensure we have default label text 
           # (since Rails' label() does not currently respect I18n)
           label_options[:text] ||= object.class.human_attribute_name(field.to_s)
+        end
+          
+        label_options
+      end
+      
+      def extract_options_for_template(helper_name, options={})
+        template_options = {}
+        
+        if options.has_key?(:template) && options[:template].kind_of?(FalseClass)
+          template_options[:template] = false
+        else  
+          # grab the template
+          template = options.delete(:template) || helper_name.to_s
+          template = self.fallback_template unless template_exists?(template)
+          template_options[:template] = template
+        end
+          
+        template_options
+      end  
+    
+    public
+      def without_assistance(options={}, &block)
+        # TODO - allow options to only turn off templates and/or labels
+        ignore_labels, ignore_templates = self.class.ignore_labels, self.class.ignore_templates
+       
+        self.class.ignore_labels, self.class.ignore_templates = true, true
+          result = yield
+        self.class.ignore_labels, self.class.ignore_templates = ignore_labels, ignore_templates
+
+        result
+      end
+    
+      def widget(field, *args, &block)
+        options          = args.extract_options!
+        label_options    = extract_options_for_label(field, options)
+        template_options = extract_options_for_template(self.fallback_template, options)
+        label            = label_options[:label] === false ? nil : self.label(field, label_options.delete(:text), label_options)
+        tip              = options.delete(:tip)
+        required         = !!options.delete(:required)
+
+        element = without_assistance do
+          @template.capture(&block)
+        end  
+        
+        render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, args)
+      end
+      
+      # redefining all traditional form helpers so that they
+      # behave the way FormAssistant thinks they should behave
+      send(:form_helpers).each do |helper_name|
+        define_method(helper_name) do |field, *args|
+          options          = args.extract_options!
+          label_options    = extract_options_for_label(field, options)
+          template_options = extract_options_for_template(helper_name, options)
           
           # build out the label element (if desired)
-          label = ignore_label ? nil : self.label(field, label_options.delete(:text), label_options)
-
-          should_render_with_template = true
-          should_render_with_template = false if options.has_key?(:template) && options[:template].kind_of?(FalseClass)
-          
-          # grab the template
-          template = options.delete(:template) || name.to_s
-          template = self.fallback_template unless template_exists?(template)
+          label = label_options[:label] === false ? nil : self.label(field, label_options.delete(:text), label_options)
 
           # grab the tip, if any
           tip = options.delete(:tip)
@@ -186,13 +228,13 @@ module RPH
           # call the original render for the element
           element = super(field, *(args << field_options))
           
-          return element unless should_render_with_template
+          return element if template_options[:template] === false
           
           # return the helper with an optional label if templates are not to be used
-          return render_element(element, field, name, options, ignore_label) if self.class.ignore_templates
+          return render_element(element, field, helper_name, options, label_options[:label] === false) if self.class.ignore_templates
           
           # render the partial template from the desired template root
-          render_partial_for(element, field, label, tip, template, name, required, args)
+          render_partial_for(element, field, label, tip, template_options[:template], helper_name, required, args)
         end
       end
       

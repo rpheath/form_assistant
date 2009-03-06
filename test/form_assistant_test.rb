@@ -2,9 +2,16 @@ require 'test_helper'
 
 module FormAssistantHelpers
   attr_accessor :render_options
+  attr_accessor :view
+  attr_accessor :response
+  
+  def view
+    @view ||= ActionView::Base.new(Rails.configuration.view_path)  
+  end
+  
   def render(options={})
     self.render_options = options
-    String.new
+    @response = view.render(options)
   end
 
   def locals
@@ -35,7 +42,7 @@ module FormAssistantHelpers
 end
 
 class AddressBook < ActiveRecord::Base
-  attr_accessor *%w(first_name nickname)
+  attr_accessor *%w(first_name nickname day month year)
   
   def self.columns
     Hash.new
@@ -48,11 +55,11 @@ class FormAssistantTest < ActionView::TestCase
   attr_accessor :form
 
   def setup
+    Rails.configuration.view_path = File.expand_path(File.dirname(__FILE__))
+
     @address_book = AddressBook.new
-    # @address_book = OpenStruct.new
-    # @address_book.stubs(:errors).returns(@errors ||= ActiveRecord::Errors.new(@address_book))
     @form = RPH::FormAssistant::FormBuilder.new(:address_book, @address_book, self, {}, nil)
-    RPH::FormAssistant::FormBuilder.template_root = File.expand_path(File.join(File.dirname(__FILE__), '../forms'))
+    RPH::FormAssistant::FormBuilder.template_root = File.expand_path(File.join(File.dirname(__FILE__), 'forms'))
   end
   
   test "should use template based on input type" do
@@ -118,5 +125,22 @@ class FormAssistantTest < ActionView::TestCase
     @address_book.errors.add(:first_name, 'cannot be admin')
     form.text_field :first_name
     expect_locals :errors => ['First name cannot be root and cannot be admin']
+  end
+  
+  test "should create widget" do
+    @address_book.errors.add(:birthday, 'is invalid')
+    
+    form.widget :birthday, :tip => 'Enter your birthday' do
+      concat @day   = form.select(:day,   (1..31))
+      concat @month = form.select(:month, (1..12))
+      concat @year  = form.select(:year,  (1975...1985))
+    end
+    
+    expect_locals :element => (@day + @month + @year),
+      :errors => ['Birthday is invalid'],
+      :tip    => 'Enter your birthday',
+      :helper => 'widget'
+    
+    expect_render :partial => template_path('field')  
   end
 end
