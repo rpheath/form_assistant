@@ -136,7 +136,7 @@ module RPH
         # consider the global setting for labels and
         # allow for turning labels off on a per-helper basis
         # <%= form.text_field :title, :label => false %>
-        if self.class.ignore_labels || options[:label] === false
+        if self.class.ignore_labels || options[:label] === false || field.blank?
           label_options[:label] = false
         else  
           # ensure that the :label option is a Hash from this point on
@@ -190,8 +190,9 @@ module RPH
         result
       end
     
-      def widget(field, *args, &block)
+      def widget(*args, &block)
         options          = args.extract_options!
+        field            = args.shift || nil 
         label_options    = extract_options_for_label(field, options)
         template_options = extract_options_for_template(self.fallback_template, options)
         label            = label_options[:label] === false ? nil : self.label(field, label_options.delete(:text), label_options)
@@ -202,7 +203,8 @@ module RPH
           @template.capture(&block)
         end  
         
-        render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, args)
+        partial = render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, args)
+        RPH::FormAssistant::Rules.binding_required? ? @template.concat(partial, block.binding) : @template.concat(partial)
       end
       
       # redefining all traditional form helpers so that they

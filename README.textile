@@ -95,6 +95,22 @@ Another convenient thing about the form assistant is the ability to control labe
 
 That works for all form helpers (text_area, check_box, etc). And by default, the label will be the humanized version of the field name, so that's what you'll get if you ignore the label options altogether.
 
+h3. Form Widgets
+
+Sometimes, a single form field isn't enough.  Form assistant provides a construct to help you
+with this, called widget:
+
+<pre><code><% form.widget :expiration_date, :label => 'Card expiration date' do %>
+  <%= form.select :expiration_month, (1..12) %>
+  <%= form.select :expiration_month, (1..12) %>
+<% end %></code></pre>
+
+There are a few things to note about this new feature:
+
+  * error messages will come from the errors on the field name ('expiration_date' in the above example)
+  * templates and labels are disabled for the duration of the block
+  * the default template for widgets is the fallback template (===_field.html.erb=== unless configured otherwise)
+
 h3. Custom Helpers
 
 The form assistant provides a #cancel() helper that will allow the user to go back to the previous screen, automatically.
