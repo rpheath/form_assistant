@@ -104,7 +104,7 @@ module RPH
       # renders the appropriate partial located in the template root
       def render_partial_for(element, field, label, tip, template, helper, required, args)
         errors = self.class.ignore_errors ? nil : error_message_for(field)
-        locals = { :element => element, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required }
+        locals = { :element => element, :field => field, :builder => self, :object => object, :object_name => object_name, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required }
 
         @template.render :partial => "#{self.class.template_root}/#{template}.html.erb", :locals => locals
       end
