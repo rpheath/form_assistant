@@ -143,4 +143,9 @@ class FormAssistantTest < ActionView::TestCase
     
     expect_render :partial => template_path('field')  
   end
+  
+  test "should pass extra locals" do
+    form.text_field :first_name, :locals => { :nickname => true }
+    expect_locals :nickname => true
+  end
 end

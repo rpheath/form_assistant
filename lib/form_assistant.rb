@@ -102,9 +102,9 @@ module RPH
       
     protected
       # renders the appropriate partial located in the template root
-      def render_partial_for(element, field, label, tip, template, helper, required, args)
+      def render_partial_for(element, field, label, tip, template, helper, required, extra_locals, args)
         errors = self.class.ignore_errors ? nil : error_message_for(field)
-        locals = { :element => element, :field => field, :builder => self, :object => object, :object_name => object_name, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required }
+        locals = extra_locals.merge(:element => element, :field => field, :builder => self, :object => object, :object_name => object_name, :label => label, :errors => errors, :tip => tip, :helper => helper, :required => required)
 
         @template.render :partial => "#{self.class.template_root}/#{template}.html.erb", :locals => locals
       end
@@ -203,7 +203,7 @@ module RPH
           @template.capture(&block)
         end  
         
-        partial = render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, args)
+        partial = render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, {}, args)
         RPH::FormAssistant::Rules.binding_required? ? @template.concat(partial, block.binding) : @template.concat(partial)
       end
       
@@ -214,6 +214,7 @@ module RPH
           options          = args.extract_options!
           label_options    = extract_options_for_label(field, options)
           template_options = extract_options_for_template(helper_name, options)
+          extra_locals     = options.delete(:locals) || {}
           
           # build out the label element (if desired)
           label = label_options[:label] === false ? nil : self.label(field, label_options.delete(:text), label_options)
@@ -236,7 +237,7 @@ module RPH
           return render_element(element, field, helper_name, options, label_options[:label] === false) if self.class.ignore_templates
           
           # render the partial template from the desired template root
-          render_partial_for(element, field, label, tip, template_options[:template], helper_name, required, args)
+          render_partial_for(element, field, label, tip, template_options[:template], helper_name, required, extra_locals, args)
         end
       end
       
