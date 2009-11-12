@@ -211,7 +211,7 @@ module RPH
       # behave the way FormAssistant thinks they should behave
       send(:form_helpers).each do |helper_name|
         define_method(helper_name) do |field, *args|
-          options          = args.extract_options!
+          options          = (helper_name == 'check_box' ? args.shift : args.extract_options!) || {}
           label_options    = extract_options_for_label(field, options)
           template_options = extract_options_for_template(helper_name, options)
           extra_locals     = options.delete(:locals) || {}
@@ -229,7 +229,8 @@ module RPH
           field_options = options.except(:label, :template, :tip, :required)
           
           # call the original render for the element
-          element = super(field, *(args << field_options))
+          super_args = helper_name == 'check_box' ? args.unshift(field_options) : args.push(field_options)
+          element = super(field, *super_args)
           
           return element if template_options[:template] === false
           
