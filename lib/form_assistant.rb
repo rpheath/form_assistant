@@ -179,37 +179,7 @@ module RPH
       end  
     
     public
-      def without_assistance(options={}, &block)
-        # TODO - allow options to only turn off templates and/or labels
-        ignore_labels, ignore_templates = self.class.ignore_labels, self.class.ignore_templates
-       
-        self.class.ignore_labels, self.class.ignore_templates = true, true
-          result = yield
-        self.class.ignore_labels, self.class.ignore_templates = ignore_labels, ignore_templates
-
-        result
-      end
-    
-      def widget(*args, &block)
-        options          = args.extract_options!
-        field            = args.shift || nil 
-        label_options    = extract_options_for_label(field, options)
-        template_options = extract_options_for_template(self.fallback_template, options)
-        label            = label_options[:label] === false ? nil : self.label(field, label_options.delete(:text), label_options)
-        tip              = options.delete(:tip)
-        required         = !!options.delete(:required)
-
-        element = without_assistance do
-          @template.capture(&block)
-        end  
-        
-        partial = render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, {}, args)
-        RPH::FormAssistant::Rules.binding_required? ? @template.concat(partial, block.binding) : @template.concat(partial)
-      end
-      
-      # redefining all traditional form helpers so that they
-      # behave the way FormAssistant thinks they should behave
-      send(:form_helpers).each do |helper_name|
+      def self.assist(helper_name)
         define_method(helper_name) do |field, *args|
           options          = (helper_name == 'check_box' ? args.shift : args.extract_options!) || {}
           label_options    = extract_options_for_label(field, options)
@@ -240,6 +210,43 @@ module RPH
           # render the partial template from the desired template root
           render_partial_for(element, field, label, tip, template_options[:template], helper_name, required, extra_locals, args)
         end
+      end
+      
+      # redefining all traditional form helpers so that they
+      # behave the way FormAssistant thinks they should behave
+      send(:form_helpers).each do |helper_name|
+        assist(helper_name)
+      end
+    
+      def without_assistance(options={}, &block)
+        # TODO - allow options to only turn off templates and/or labels
+        ignore_labels, ignore_templates = self.class.ignore_labels, self.class.ignore_templates
+       
+        begin
+          self.class.ignore_labels, self.class.ignore_templates = true, true
+          result = yield
+        ensure  
+          self.class.ignore_labels, self.class.ignore_templates = ignore_labels, ignore_templates
+        end  
+
+        result
+      end
+    
+      def widget(*args, &block)
+        options          = args.extract_options!
+        field            = args.shift || nil 
+        label_options    = extract_options_for_label(field, options)
+        template_options = extract_options_for_template(self.fallback_template, options)
+        label            = label_options[:label] === false ? nil : self.label(field, label_options.delete(:text), label_options)
+        tip              = options.delete(:tip)
+        required         = !!options.delete(:required)
+
+        element = without_assistance do
+          @template.capture(&block)
+        end  
+        
+        partial = render_partial_for(element, field, label, tip, template_options[:template], 'widget', required, {}, args)
+        RPH::FormAssistant::Rules.binding_required? ? @template.concat(partial, block.binding) : @template.concat(partial)
       end
       
       # Renders a partial, passing the form object as a local
