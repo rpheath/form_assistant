@@ -113,79 +113,11 @@ There are a few things to note about this new feature:
 
 h3. Custom Helpers
 
-The form assistant provides a #cancel() helper that will allow the user to go back to the previous screen, automatically.
-
-<pre><code><%= form.cancel %>
-
-<span class="cancel">
-  <a href="/wherever/the/user/came/from">Cancel</a>
-</span>
-
-# other options:
-<%= form.cancel 'Go Back' %>
-<%= form.cancel 'Nevermind', :path => some_path %>
-<%= form.cancel 'Go Back', :attrs => { :class => 'go-back' } %>
-</code></pre>
-
-I usually like to give my submit buttons special attention, and so does form assistant:
-
-<pre><code><%= form.submission %>
-
-<p class="submission">
-  <input type="submit" value="Save Changes" ... />
-</p>
-
-# other options:
-<%= form.submission 'Save Project' %>
-<%= form.submission 'Save', :class => 'button' %>
-<%= form.submission 'Save', :attrs => { :class => 'submit-wrapper' } %>
-</code></pre>
-
-There's also a @#partial()@ helper:
+@#partial()@ helper:
 
 <pre><code><%= form.partial 'shared/new', :locals => { ... } %></code></pre>
 
 The builder variable will be automatically passed as a local called 'form'.
-
-h3. Bonus Features
-
-Here are a few bonus features:
-
-<pre><code><% form.div :class => 'admin' do %>
-  // admin fields
-<% end %>
-
-<div class="admin">
-  // admin fields
-</div>
-
-# other options:
-<% form.p :id => 'notice' do %>
-<% form.span :class => 'highlight' do %>
-</code></pre>
-
-Now, an easier way to wrap a div around content:
-
-<pre><code><% form.admin_operations do %>
-  // admin-operations
-<% end %>
-
-<div class="admin-operations">
-  // admin-operations
-</div>
-
-<% form.admin_operations :glue => ' ' do %>
-  // admin operations
-<% end %>
-
-<div class="admin operations">
-  // admin operations
-</div>
-</code></pre>
-
-These helpers can be found in lib/form_assistant/helpers.rb. It was designed for extensibility, so please go crazy adding your own helpers! (see how easy it is by the existing implementations)
-
-Enjoy keeping your forms DRY.
 
 h2. Requirements
 

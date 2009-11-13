@@ -1,4 +1,4 @@
-%w(error rules builder collector helpers field_errors).each do |f|
+%w(error field_errors rules).each do |f|
   require File.join(File.dirname(__FILE__), 'form_assistant', f)
 end
 
@@ -6,6 +6,12 @@ end
 module RPH
   # The idea is to make forms extremely less painful and a lot more DRY
   module FormAssistant
+    FORM_HELPERS = [
+      ActionView::Helpers::FormBuilder.field_helpers + 
+      %w(date_select datetime_select time_select collection_select select country_select time_zone_select) - 
+      %w(hidden_field label fields_for)
+    ].flatten.freeze
+        
     # FormAssistant::FormBuilder
     #   * provides several convenient helpers (see helpers.rb) and
     #     an infrastructure to easily add your own
@@ -30,7 +36,6 @@ module RPH
     #   # in config/intializers/form_assistant.rb
     #   ActionView::Base.default_form_builder = RPH::FormAssistant::FormBuilder
     class FormBuilder < ActionView::Helpers::FormBuilder
-      include RPH::FormAssistant::Helpers
       cattr_accessor :ignore_templates
       cattr_accessor :ignore_labels
       cattr_accessor :ignore_errors
@@ -73,8 +78,10 @@ module RPH
         errors = if RPH::FormAssistant::Rules.has_I18n_support?
           full_messages_for(field)
         else
-          errors = object.errors[field]
-          [[field.to_s.humanize, (errors.is_a?(Array) ? errors.to_sentence : errors).to_s].join(' ')]
+          human_field_name = field.to_s.humanize
+          errors = [*object.errors[field]].map do |error|
+            "#{human_field_name} #{error}"
+          end  
         end
         
         RPH::FormAssistant::FieldErrors.new(errors)
@@ -214,7 +221,7 @@ module RPH
       
       # redefining all traditional form helpers so that they
       # behave the way FormAssistant thinks they should behave
-      send(:form_helpers).each do |helper_name|
+      RPH::FormAssistant::FORM_HELPERS.each do |helper_name|
         assist(helper_name)
       end
     

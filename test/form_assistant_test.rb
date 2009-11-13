@@ -124,7 +124,7 @@ class FormAssistantTest < ActionView::TestCase
     @address_book.errors.add(:first_name, 'cannot be root')
     @address_book.errors.add(:first_name, 'cannot be admin')
     form.text_field :first_name
-    expect_locals :errors => ['First name cannot be root and cannot be admin']
+    expect_locals :errors => ['First name cannot be root', 'First name cannot be admin']
   end
   
   test "should create widget" do
