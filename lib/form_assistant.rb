@@ -265,6 +265,33 @@ module RPH
         @template.render options
       end
       
+      def input(field, *args)
+        helper_name = case column_type(field)
+          when :string
+            field.to_s.include?('password') ? :password_field : :text_field
+          when :text                      ; :text_area
+          when :integer, :float, :decimal ; :text_field
+          when :date                      ; :date_select
+          when :datetime, :timestamp      ; :datetime_select
+          when :time                      ; :time_select
+          when :boolean                   ; :check_box
+          else                            ; :text_field
+        end
+        
+        send(helper_name, field, *args)
+      end
+      
+      def inputs(*args)
+        options = args.extract_options!
+        args.flatten.map do |field|
+          input(field, options)
+        end.join('')
+      end
+
+      def column_type(field)
+        object.class.columns_hash[field.to_s].type rescue :string
+      end
+      
       # since #fields_for() doesn't inherit the builder from form_for, we need
       # to provide a means to set the builder automatically (works with nesting, too)
       #

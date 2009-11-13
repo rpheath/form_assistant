@@ -42,10 +42,26 @@ module FormAssistantHelpers
 end
 
 class AddressBook < ActiveRecord::Base
-  attr_accessor *%w(first_name nickname day month year)
-  
+  class Column
+    attr_accessor :name, :type
+    def initialize(name, type)
+      @name, @type = name, type
+    end
+  end
+    
+  attr_accessor :first_name, :nickname, 
+    :day, :month, :year, :is_boy,
+    :created_at
+
   def self.columns
-    Hash.new
+    {}
+  end
+  
+  def self.columns_hash
+    [ Column.new('first_name', :string),
+      Column.new('is_boy', :boolean),
+      Column.new('created_at', :datetime)
+    ].index_by(&:name)
   end
 end
 
@@ -147,5 +163,24 @@ class FormAssistantTest < ActionView::TestCase
   test "should pass extra locals" do
     form.text_field :first_name, :locals => { :nickname => true }
     expect_locals :nickname => true
+  end
+  
+  test 'should create proper fields with #input' do
+    form.expects(:text_field).with(:first_name)
+    form.input :first_name
+    
+    form.expects(:check_box).with(:is_boy)
+    form.input :is_boy
+    
+    form.expects(:datetime_select).with(:created_at)
+    form.input :created_at
+  end
+  
+  test 'should create many fields with #inputs' do
+    options = { :required => true }
+    form.expects(:text_field).with(:first_name, options)
+    form.expects(:check_box).with(:is_boy, options)
+    form.expects(:datetime_select).with(:created_at, options)
+    form.inputs :first_name, :is_boy, :created_at, options
   end
 end
