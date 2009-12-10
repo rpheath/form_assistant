@@ -284,7 +284,7 @@ module RPH
       def inputs(*args)
         options = args.extract_options!
         args.flatten.map do |field|
-          input(field, options)
+          input(field, options.dup)
         end.join('')
       end
 
