@@ -7,9 +7,9 @@ module RPH
   # The idea is to make forms extremely less painful and a lot more DRY
   module FormAssistant
     FORM_HELPERS = [
-      ActionView::Helpers::FormBuilder.field_helpers + 
-      %w(date_select datetime_select time_select collection_select select country_select time_zone_select) - 
-      %w(hidden_field label fields_for)
+      ActionView::Helpers::FormBuilder.field_helpers.map(&:to_sym) +
+      %w(date_select datetime_select time_select collection_select select country_select time_zone_select).map(:to_sym) -
+      %w(hidden_field label fields_for).map(&:to_sym)
     ].flatten.freeze
         
     # FormAssistant::FormBuilder
